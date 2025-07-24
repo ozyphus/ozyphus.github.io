@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smooth Dancing Robot - Component Architecture</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .component-box {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .component-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .component-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .component-details {
+            font-size: 0.9em;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .wave-visualization {
+            background: #1a202c;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wave-title {
+            color: #f7fafc;
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .motor-arm {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100px;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .motor {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #4299e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+            animation: wave-motion 3s ease-in-out infinite;
+        }
+
+        .motor:nth-child(1) { animation-delay: 0s; }
+        .motor:nth-child(2) { animation-delay: 0.15s; }
+        .motor:nth-child(3) { animation-delay: 0.3s; }
+        .motor:nth-child(4) { animation-delay: 0.45s; }
+        .motor:nth-child(5) { animation-delay: 0.6s; }
+
+        @keyframes wave-motion {
+            0%, 100% { transform: translateY(0) rotate(0deg); background: #4299e1; }
+            25% { transform: translateY(-15px) rotate(5deg); background: #63b3ed; }
+            50% { transform: translateY(0) rotate(0deg); background: #90cdf4; }
+            75% { transform: translateY(15px) rotate(-5deg); background: #63b3ed; }
+        }
+
+        .wave-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #4299e1, #63b3ed, #90cdf4, #63b3ed, #4299e1);
+            animation: wave-propagation 3s ease-in-out infinite;
+        }
+
+        @keyframes wave-propagation {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .motor-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: #a0aec0;
+        }
+
+        .flow-diagram {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .flow-step {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+        }
+
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #4a5568;
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .flow-number {
+            background: rgba(255, 255, 255, 0.2);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+        }
+
+        .key-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: #edf2f7;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #4299e1;
+        }
+
+        .feature-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .feature-description {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .code-snippet {
+            background: #1a202c;
+            color: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .highlight {
+            color: #4299e1;
+            font-weight: bold;
+        }
+
+        .music-analyzer {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .wave-dancer {
+            background: linear-gradient(135deg, #4834d4, #686de0);
+        }
+
+        .robot-controller {
+            background: linear-gradient(135deg, #00d2d3, #01a3a4);
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 Smooth Dancing Robot Architecture</h1>
+        <p class="subtitle">Ultra-smooth continuous wave propagation through robotic arm motors</p>
+
+        <div class="architecture-grid">
+            <div class="component-box music-analyzer">
+                <div class="component-title">🎤 Music Analyzer</div>
+                <div class="component-details">
+                    <strong>Real-time Audio Processing</strong><br>
+                    • Captures microphone input (44.1kHz)<br>
+                    • Calculates RMS volume intensity<br>
+                    • Normalizes to 0.1-1.0 range<br>
+                    • Queues intensity values<br>
+                    • Updates at ~100Hz
+                </div>
+            </div>
+
+            <div class="component-box wave-dancer">
+                <div class="component-title">🌊 Continuous Wave Dancer</div>
+                <div class="component-details">
+                    <strong>Wave Physics Engine</strong><br>
+                    • Traveling wave equation: A·sin(kx - ωt + φ)<br>
+                    • 5 motors: shoulder→elbow→wrist→roll→gripper<br>
+                    • Harmonic overtones for natural motion<br>
+                    • Cubic spline interpolation<br>
+                    • 100Hz motion updates
+                </div>
+            </div>
+
+            <div class="component-box robot-controller">
+                <div class="component-title">🤖 SO101 Follower</div>
+                <div class="component-details">
+                    <strong>Hardware Interface</strong><br>
+                    • USB serial communication<br>
+                    • Motor position control<br>
+                    • Smooth calibration system<br>
+                    • Real-time feedback<br>
+                    • Safe disconnect handling
+                </div>
+            </div>
+        </div>
+
+        <div class="wave-visualization">
+            <div class="wave-title">🌊 Wave Propagation Through Robot Arm</div>
+            <div class="motor-arm">
+                <div class="wave-line"></div>
+                <div class="motor">2</div>
+                <div class="motor">3</div>
+                <div class="motor">4</div>
+                <div class="motor">5</div>
+                <div class="motor">6</div>
+            </div>
+            <div class="motor-labels">
+                <span>Shoulder Lift</span>
+                <span>Elbow Flex</span>
+                <span>Wrist Flex</span>
+                <span>Wrist Roll</span>
+                <span>Gripper</span>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; margin: 40px 0 20px;">🔄 System Flow</h2>
+        <div class="flow-diagram">
+            <div class="flow-step">
+                <div class="flow-number">1</div>
+                <div><strong>Audio Capture</strong></div>
+                <div style="font-size: 0.9em; margin-top: 10px;">
+                    Microphone captures sound → RMS calculation → Intensity normalization
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div class="flow-number">2</div>
+                <div><strong>Wave Calculation</strong></div>
+                <div style="font-size: 0.9em; margin-top: 10px;">
+                    Traveling wave equation → Position calculation → Harmonic blending
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div class="flow-number">3</div>
+                <div><strong>Smooth Interpolation</strong></div>
+                <div style="font-size: 0.9em; margin-top: 10px;">
+                    Cubic spline → Motion limiting → Ultra-smooth transitions
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div class="flow-number">4</div>
+                <div><strong>Robot Motion</strong></div>
+                <div style="font-size: 0.9em; margin-top: 10px;">
+                    Motor commands → Position control → Continuous wave dance
+                </div>
+            </div>
+        </div>
+
+        <div class="key-features">
+            <div class="feature-card">
+                <div class="feature-title">🎯 Wave Physics</div>
+                <div class="feature-description">
+                    Uses true traveling wave equations to create natural, flowing motion through the robot arm. Each motor represents a point along the wave, with phase delays creating smooth propagation.
+                </div>
+                <div class="code-snippet">
+                    wave_value = <span class="highlight">sin(k·x - ω·t + φ)</span><br>
+                    + 0.3·sin(2k·x - ω·t + π/4)<br>
+                    + 0.1·sin(3k·x - ω·t + π/2)
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">🎵 Music Responsiveness</div>
+                <div class="feature-description">
+                    Real-time audio analysis drives wave amplitude and frequency. Louder music creates larger, more energetic waves while maintaining smooth continuity.
+                </div>
+                <div class="code-snippet">
+                    intensity = <span class="highlight">sqrt(mean(audio²))</span> / 2000<br>
+                    amplitude = base_amp × (0.6 + 0.4 × intensity)
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">🌊 Ultra-Smooth Motion</div>
+                <div class="feature-description">
+                    Cubic spline interpolation, motion limiting, and gentle transitions eliminate jerkiness. Updates at 100Hz with position buffers for seamless motion.
+                </div>
+                <div class="code-snippet">
+                    spline = <span class="highlight">CubicSpline</span>(times, positions)<br>
+                    smooth_pos = old_pos + change × 0.9<br>
+                    max_change = 0.3° per update
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">🔧 Safe Operation</div>
+                <div class="feature-description">
+                    Gentle initialization to neutral positions, smooth returns, and error handling ensure safe operation. All transitions use cubic easing for natural movement.
+                </div>
+                <div class="code-snippet">
+                    progress = t² × (3 - 2t)  <span class="highlight"># Cubic easing</span><br>
+                    new_pos = start + (target - start) × progress
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">⚡ High Performance</div>
+                <div class="feature-description">
+                    Multi-threaded architecture with separate threads for audio analysis, wave computation, and robot control. Optimized for real-time performance.
+                </div>
+                <div class="code-snippet">
+                    Audio Thread: <span class="highlight">~100Hz</span> (PyAudio)<br>
+                    Wave Thread: <span class="highlight">100Hz</span> (motion updates)<br>
+                    Main Thread: <span class="highlight">10Hz</span> (intensity updates)
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">🎛️ Motor Configuration</div>
+                <div class="feature-description">
+                    Five motors create the wave: shoulder lift, elbow flex, wrist flex, wrist roll, and gripper. Each has specific positioning and amplitude characteristics.
+                </div>
+                <div class="code-snippet">
+                    Motors 2-6: <span class="highlight">Wave propagation</span><br>
+                    Positions: [0.0, 0.25, 0.5, 0.75, 1.0]<br>
+                    Gripper: Special handling (40± base)
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #f7fafc; padding: 25px; border-radius: 15px; margin-top: 40px; text-align: center;">
+            <h3 style="color: #2d3748; margin-bottom: 15px;">🚀 Key Innovation</h3>
+            <p style="color: #4a5568; font-size: 1.1em; line-height: 1.8;">
+                This system creates <strong>true continuous wave motion</strong> by treating the robot arm as a physical medium through which waves propagate. Unlike traditional robotic choreography that moves joints independently, this approach uses <strong>wave physics</strong> to create naturally flowing, organic motion that responds dynamically to music in real-time.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to component boxes
+            const boxes = document.querySelectorAll('.component-box');
+            boxes.forEach(box => {
+                box.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                });
+            });
+
+            // Add pulsing effect to wave visualization
+            const waveViz = document.querySelector('.wave-visualization');
+            setInterval(() => {
+                waveViz.classList.add('pulse');
+                setTimeout(() => {
+                    waveViz.classList.remove('pulse');
+                }, 1000);
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

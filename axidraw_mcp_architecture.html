@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AxiDraw MCP Architecture</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+        }
+        
+        .architecture {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .layer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .component {
+            background: white;
+            border: 3px solid;
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        
+        .component:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .user { border-color: #4CAF50; background: linear-gradient(135deg, #E8F5E8, #C8E6C9); }
+        .claude { border-color: #2196F3; background: linear-gradient(135deg, #E3F2FD, #BBDEFB); }
+        .mcp-client { border-color: #FF9800; background: linear-gradient(135deg, #FFF3E0, #FFE0B2); }
+        .mcp-server { border-color: #9C27B0; background: linear-gradient(135deg, #F3E5F5, #E1BEE7); }
+        .axidraw { border-color: #F44336; background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+        
+        .component-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .component-desc {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .arrow {
+            position: absolute;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+        
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #764ba2;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        
+        .arrow-down {
+            width: 3px;
+            height: 40px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .arrow-down::after {
+            bottom: -8px;
+            top: auto;
+            left: -4px;
+            right: auto;
+            border-top: 10px solid #764ba2;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: none;
+        }
+        
+        .flow-label {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .protocol-layer {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px dashed #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .protocol-title {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .hardware-layer {
+            background: rgba(244, 67, 54, 0.1);
+            border: 2px dashed #F44336;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .hardware-title {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+            font-weight: bold;
+            color: #F44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">AxiDraw MCP Server Architecture</div>
+        
+        <div class="architecture">
+            <!-- User Layer -->
+            <div class="layer">
+                <div class="component user">
+                    <div class="component-title">👤 User</div>
+                    <div class="component-desc">Makes drawing requests via natural language</div>
+                </div>
+            </div>
+            
+            <div class="arrow arrow-down"></div>
+            <div class="flow-label" style="top: 90px;">Natural Language Request</div>
+            
+            <!-- Claude LLM Layer -->
+            <div class="layer">
+                <div class="component claude">
+                    <div class="component-title">🧠 Claude LLM</div>
+                    <div class="component-desc">Processes natural language<br>Decides which MCP tools to use<br>Formats tool calls</div>
+                </div>
+            </div>
+            
+            <div class="arrow arrow-down"></div>
+            <div class="flow-label" style="top: 200px;">MCP Tool Calls</div>
+            
+            <!-- MCP Protocol Layer -->
+            <div class="protocol-layer">
+                <div class="protocol-title">🔗 MCP Protocol Layer</div>
+                
+                <div class="layer">
+                    <div class="component mcp-client">
+                        <div class="component-title">📱 MCP Client</div>
+                        <div class="component-desc">Claude Desktop/API<br>Sends JSON-RPC calls<br>via stdio/transport</div>
+                    </div>
+                    
+                    <div class="arrow" style="top: 50%; left: 220px;"></div>
+                    <div class="flow-label" style="top: 45px; left: 240px;">JSON-RPC</div>
+                    
+                    <div class="component mcp-server">
+                        <div class="component-title">⚙️ AxiDraw MCP Server</div>
+                        <div class="component-desc">src/server.py<br>Handles 5 tools:<br>• plot_text_drawing<br>• plot_svg<br>• plot_photo<br>• create_simple_drawing<br>• axidraw_status</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="arrow arrow-down"></div>
+            <div class="flow-label" style="top: 420px;">SVG Generation & CLI Commands</div>
+            
+            <!-- Hardware Layer -->
+            <div class="hardware-layer">
+                <div class="hardware-title">🔧 Hardware Control Layer</div>
+                
+                <div class="layer">
+                    <div class="component axidraw">
+                        <div class="component-title">🖊️ AxiDraw Hardware</div>
+                        <div class="component-desc">Physical pen plotter<br>Controlled via axicli<br>Plots SVG files</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Data Flow Legend -->
+        <div style="margin-top: 40px; padding: 20px; background: rgba(102, 126, 234, 0.05); border-radius: 15px;">
+            <h3 style="color: #667eea; margin-bottom: 15px;">🔄 Data Flow Types</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div><strong>Natural Language:</strong> "Draw a dancing cat"</div>
+                <div><strong>MCP Tool Call:</strong> plot_text_drawing(description="dancing cat")</div>
+                <div><strong>SVG Generation:</strong> Creates vector graphics</div>
+                <div><strong>CLI Command:</strong> python3 -m axicli file.svg --mode plot</div>
+                <div><strong>Physical Output:</strong> Pen movements on paper</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
