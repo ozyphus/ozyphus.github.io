@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Infrastructure Strategy Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hero {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .navigation {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .nav-item {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .nav-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .subsection {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .subsection h3 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .calculator {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #667eea;
+        }
+
+        .calculator input, .calculator select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .calc-button {
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+
+        .calc-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .resource-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .resource-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .resource-card a {
+            color: #764ba2;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .resource-card a:hover {
+            text-decoration: underline;
+        }
+
+        .diagram {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .flow-diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .flow-box {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 150px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .arrow {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .toggle-content {
+            cursor: pointer;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-content:hover {
+            background: #e9ecef;
+        }
+
+        .toggle-content .toggle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .toggle-body {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .toggle-body.active {
+            display: block;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>🚀 ML Infrastructure Strategy Mastery</h1>
+            <p>Your comprehensive guide to building high-performance, scalable machine learning systems</p>
+            <div style="text-align: center; margin-top: 20px;">
+                <span style="background: #667eea; color: white; padding: 8px 16px; border-radius: 20px; margin: 5px;">🎯 Expert-Level</span>
+                <span style="background: #764ba2; color: white; padding: 8px 16px; border-radius: 20px; margin: 5px;">📊 Interactive</span>
+                <span style="background: #28a745; color: white; padding: 8px 16px; border-radius: 20px; margin: 5px;">💰 Cost-Optimized</span>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <div class="nav-grid">
+                <button class="nav-item" onclick="showSection('overview')">📋 Overview & Resources</button>
+                <button class="nav-item" onclick="showSection('compute')">🖥️ High-Performance Compute</button>
+                <button class="nav-item" onclick="showSection('storage')">💾 Storage & Data Pipeline</button>
+                <button class="nav-item" onclick="showSection('networking')">🌐 Networking & Distribution</button>
+                <button class="nav-item" onclick="showSection('benchmarking')">📊 Benchmarking & Tuning</button>
+                <button class="nav-item" onclick="showSection('finops')">💰 FinOps & Cost Management</button>
+                <button class="nav-item" onclick="showSection('scenarios')">🎯 Real-World Scenarios</button>
+                <button class="nav-item" onclick="showSection('calculators')">🧮 Resource Calculators</button>
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview" class="content-section active">
+            <h2 class="section-title">📋 Overview & Essential Resources</h2>
+            
+            <div class="highlight-box">
+                <h3>🎯 What You'll Master</h3>
+                <p>Build expertise in scalable, high-performance ML infrastructure covering compute, storage, networking, and cost optimization for both training and inference workloads.</p>
+            </div>
+
+            <div class="subsection">
+                <h3>📚 Must-Read Resources</h3>
+                
+                <div class="resource-card">
+                    <h4>🚀 Hitchhiker's Guide to ML Training Infrastructure</h4>
+                    <p><strong>Author:</strong> Jay Palat, CMU SEI (2022)</p>
+                    <p>Comprehensive introduction to hardware factors, GPU vs CPU fundamentals, and ML pipeline stages.</p>
+                    <a href="https://insights.sei.cmu.edu/blog/a-hitchhikers-guide-to-ml-training-infrastructure/" target="_blank">Read Guide →</a>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🏗️ Building Meta's GenAI Infrastructure</h4>
+                    <p><strong>Source:</strong> Meta Engineering Blog (2024)</p>
+                    <p>Deep dive into Meta's 24,000-GPU clusters for Llama 3, covering hardware, networking, and storage at scale.</p>
+                    <a href="https://engineering.fb.com/2024/03/12/data-center-engineering/building-metas-genai-infrastructure/" target="_blank">Read Case Study →</a>
+                </div>
+
+                <div class="resource-card">
+                    <h4>💰 FinOps for AI Deep Learning Pipelines</h4>
+                    <p><strong>Source:</strong> FinOps Foundation (2023)</p>
+                    <p>Cost management strategies, common cost culprits, and real examples of GPU resource optimization.</p>
+                    <a href="https://www.finops.org/assets/driving-cost-efficiency-into-ai-deep-learning-pipelines-with-finops/" target="_blank">Read Whitepaper →</a>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🔧 Right-Sizing GPUs for LLMs</h4>
+                    <p><strong>Author:</strong> Bijit Ghosh (2024)</p>
+                    <p>Practical formulas for estimating GPU memory requirements and capacity planning for large models.</p>
+                    <a href="https://medium.com/@bijit211987/right-sizing-gpus-for-llms-cbbdb0744c1b" target="_blank">Read Guide →</a>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🏭 Building GPU Clusters from Scratch</h4>
+                    <p><strong>Source:</strong> Lambda Labs (2020)</p>
+                    <p>Technical guide on designing on-premise GPU clusters, covering hardware, storage, and networking architecture.</p>
+                    <a href="https://files.lambdalabs.com/How%20to%20build%20a%20GPU%20cluster%20from%20scratch%20for%20your%20ML%20team.pdf" target="_blank">Download PDF →</a>
+                </div>
+
+                <div class="resource-card">
+                    <h4>📈 MLPerf Benchmarks</h4>
+                    <p><strong>Source:</strong> MLCommons</p>
+                    <p>Industry-standard benchmarks for ML training and inference performance across different hardware.</p>
+                    <a href="https://mlcommons.org/en/inference-datacenter-21/" target="_blank">Explore Benchmarks →</a>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <h3>🏗️ ML Infrastructure Architecture Overview</h3>
+                <div class="flow-diagram">
+                    <div class="flow-box">Data Sources<br/>📁</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Storage Layer<br/>💾</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Compute Layer<br/>🖥️</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Network Fabric<br/>🌐</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Monitoring<br/>📊</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compute Section -->
+        <div id="compute" class="content-section">
+            <h2 class="section-title">🖥️ High-Performance Compute</h2>
+
+            <div class="subsection">
+                <h3>⚡ GPU vs CPU: The Fundamental Difference</h3>
+                <p>Modern ML training is dominated by GPUs due to their massively parallel architecture. While CPUs have powerful cores optimized for sequential processing, GPUs contain thousands of smaller cores perfect for parallel operations.</p>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>CPU</th>
+                            <th>GPU</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Cores</strong></td>
+                            <td>4-64 powerful cores</td>
+                            <td>1000s of smaller cores</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Memory Bandwidth</strong></td>
+                            <td>~90 GB/s</td>
+                            <td>~2,000 GB/s (A100)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best For</strong></td>
+                            <td>Single-thread performance</td>
+                            <td>Parallel matrix operations</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ML Use Case</strong></td>
+                            <td>Data preprocessing, inference</td>
+                            <td>Training, large model inference</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="subsection">
+                <h3>🎯 Training vs Inference Requirements</h3>
+                
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>🚀 Training Requirements</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <p><strong>Memory Rule:</strong> Training typically requires 2-3× the model parameter size in GPU memory for gradients and optimizer state.</p>
+                        <p><strong>Example:</strong> A 1B parameter model (~4GB in FP32) needs ~8-12GB GPU memory for training.</p>
+                        <p><strong>Cost Example:</strong> GPT-3 training cost ~$4.6M, GPT-4 estimated >$100M in compute costs.</p>
+                    </div>
+                </div>
+
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>⚡ Inference Requirements</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <p><strong>Memory Formula:</strong> Memory ≈ (Parameters × bytes/parameter / compression) × overhead</p>
+                        <p><strong>Example:</strong> 70B LLaMA model at FP16 needs ~140GB just for weights, often requiring multiple GPUs.</p>
+                        <p><strong>Optimization:</strong> Use quantization (INT8) and batching to maximize throughput.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>📈 Scaling Challenges & Solutions</h3>
+                
+                <div class="diagram">
+                    <h4>Communication Performance: Small vs Large Clusters</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
+                        <div style="text-align: center;">
+                            <div style="background: #28a745; color: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                                <strong>8 GPUs</strong><br/>~90% Utilization
+                            </div>
+                            <p>Small clusters work well out-of-the-box</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="background: #dc3545; color: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                                <strong>24k GPUs</strong><br/>~20% Initial
+                            </div>
+                            <p>Large clusters need optimization</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="background: #28a745; color: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                                <strong>24k GPUs</strong><br/>~90% Optimized
+                            </div>
+                            <p>After topology-aware scheduling</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>🎯 Meta's 24k GPU Optimization</h3>
+                    <ul>
+                        <li><strong>Problem:</strong> Poor AllReduce performance on massive cluster</li>
+                        <li><strong>Solution 1:</strong> Topology-aware job scheduling</li>
+                        <li><strong>Solution 2:</strong> Optimized network routing and NCCL tuning</li>
+                        <li><strong>Result:</strong> Large cluster matched small cluster efficiency</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🔧 Network Topology Design</h3>
+                <p>Advanced clusters use fat-tree or dragonfly topologies for full bisection bandwidth. NVIDIA's DGX SuperPOD connects 140 nodes (1,120 GPUs) with minimal bottlenecks.</p>
+                
+                <div class="resource-card">
+                    <h4>🏗️ Meta's Dual Network Approach</h4>
+                    <p>Built two identical 24k GPU clusters - one with 400 Gbps InfiniBand, one with 400 Gbps RoCE Ethernet. Both achieved similar performance with proper tuning, demonstrating architecture flexibility.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Benchmarking Section -->
+        <div id="benchmarking" class="content-section">
+            <h2 class="section-title">📊 Benchmarking & Performance Tuning</h2>
+
+            <div class="subsection">
+                <h3>📏 Key Performance Metrics</h3>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Training</th>
+                            <th>Inference</th>
+                            <th>Tools</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Throughput</strong></td>
+                            <td>Examples/sec, tokens/sec</td>
+                            <td>Requests/sec, tokens/sec</td>
+                            <td>MLPerf, custom benchmarks</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Latency</strong></td>
+                            <td>Time per step/epoch</td>
+                            <td>Time per request</td>
+                            <td>Profilers, monitoring</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Utilization</strong></td>
+                            <td>GPU %, CPU %, Memory %</td>
+                            <td>GPU %, Network %</td>
+                            <td>nvidia-smi, htop, iostat</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Scalability</strong></td>
+                            <td>Linear scaling with GPUs</td>
+                            <td>QPS scaling with replicas</td>
+                            <td>Scaling experiments</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="subsection">
+                <h3>🔍 Profiling & Bottleneck Analysis</h3>
+                
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>🔧 GPU Profiling Tools</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <ul>
+                            <li><strong>NVIDIA Nsight Systems:</strong> Timeline view of GPU kernels and CPU activity</li>
+                            <li><strong>NVIDIA Nsight Compute:</strong> Detailed kernel-level analysis</li>
+                            <li><strong>PyTorch Profiler:</strong> Framework-level profiling with TensorBoard integration</li>
+                            <li><strong>NVIDIA DCGM:</strong> Production monitoring and telemetry</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>🎯 Common Bottlenecks</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <ul>
+                            <li><strong>GPU Memory Bound:</strong> Limited by memory bandwidth, not compute</li>
+                            <li><strong>Data Loading:</strong> CPU preprocessing can't keep up with GPU consumption</li>
+                            <li><strong>Network Communication:</strong> AllReduce or activation passing becomes bottleneck</li>
+                            <li><strong>Storage I/O:</strong> Disk throughput insufficient for data pipeline</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>⚡ Optimization Techniques</h3>
+                
+                <div class="diagram">
+                    <h4>Performance Optimization Stack</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                        <div>
+                            <h5 style="color: #667eea; margin-bottom: 10px;">Software Optimizations</h5>
+                            <ul style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                                <li>Mixed precision (FP16/BF16)</li>
+                                <li>Gradient accumulation</li>
+                                <li>Dynamic loss scaling</li>
+                                <li>Optimized data loaders</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 style="color: #764ba2; margin-bottom: 10px;">System Optimizations</h5>
+                            <ul style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                                <li>CPU-GPU affinity</li>
+                                <li>NUMA-aware placement</li>
+                                <li>Network topology optimization</li>
+                                <li>Memory pre-allocation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💡 MLPerf Insights</h3>
+                <p>MLPerf provides standardized benchmarks for comparing systems. Key examples:</p>
+                <ul>
+                    <li><strong>Training:</strong> ResNet-50, BERT, GPT-3 equivalents</li>
+                    <li><strong>Inference:</strong> Real-time and offline scenarios</li>
+                    <li><strong>Storage:</strong> Data feeding performance for accelerators</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FinOps Section -->
+        <div id="finops" class="content-section">
+            <h2 class="section-title">💰 FinOps & Cost Management</h2>
+
+            <div class="highlight-box">
+                <h3>⚠️ Cost Reality Check</h3>
+                <p>A startup wasted thousands monthly with 8 high-end GPUs sitting idle 40% of the time. Every unused GPU-hour is money lost!</p>
+            </div>
+
+            <div class="subsection">
+                <h3>📊 Resource Utilization & Scheduling</h3>
+                
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>🎯 Utilization Strategies</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <ul>
+                            <li><strong>Job Scheduling:</strong> Kubernetes with GPU operators, Slurm for HPC</li>
+                            <li><strong>Auto-scaling:</strong> Dynamic VM provisioning based on workload</li>
+                            <li><strong>Multi-tenancy:</strong> Multiple small jobs on one GPU (NVIDIA MPS)</li>
+                            <li><strong>Spot Instances:</strong> 70% cost savings for fault-tolerant workloads</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>📈 Cost Monitoring</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <ul>
+                            <li><strong>Real-time tracking:</strong> $/training run, $/1000 inferences</li>
+                            <li><strong>Budget alerts:</strong> Notifications when spend exceeds thresholds</li>
+                            <li><strong>Usage attribution:</strong> Track costs by team, project, experiment</li>
+                            <li><strong>Anomaly detection:</strong> Flag unusual spending patterns</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>☁️ Cloud vs On-Premise Strategy</h3>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Factor</th>
+                            <th>Cloud</th>
+                            <th>On-Premise</th>
+                            <th>Hybrid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Initial Cost</strong></td>
+                            <td>Low (pay-as-go)</td>
+                            <td>High (hardware investment)</td>
+                            <td>Medium</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Scalability</strong></td>
+                            <td>Instant</td>
+                            <td>Limited by hardware</td>
+                            <td>Burst to cloud</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Long-term Cost</strong></td>
+                            <td>Can be expensive at scale</td>
+                            <td>Lower if well-utilized</td>
+                            <td>Optimized</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Control</strong></td>
+                            <td>Limited</td>
+                            <td>Full control</td>
+                            <td>Flexible</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="subsection">
+                <h3>💡 Cost Optimization Tactics</h3>
+                
+                <div class="resource-card">
+                    <h4>📉 Immediate Savings</h4>
+                    <ul>
+                        <li><strong>Right-sizing:</strong> Use appropriate GPU types (T4 vs A100)</li>
+                        <li><strong>Reserved instances:</strong> Commit to usage for discounts</li>
+                        <li><strong>Model optimization:</strong> Quantization reduces inference costs</li>
+                        <li><strong>Data optimization:</strong> Parquet format cut one team's costs 30%</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🔄 Process Improvements</h4>
+                    <ul>
+                        <li><strong>Experiment tracking:</strong> Avoid duplicate costly runs</li>
+                        <li><strong>Early stopping:</strong> Kill underperforming experiments</li>
+                        <li><strong>Checkpointing:</strong> Resume from failures without full restart</li>
+                        <li><strong>Cross-team sharing:</strong> Pool resources across teams</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>🎯 FinOps Golden Rule</h3>
+                <p>"Balance innovation with budget: Achieving 99% accuracy is great — unless it doubles your infrastructure costs for a marginal gain."</p>
+            </div>
+        </div>
+
+        <!-- Scenarios Section -->
+        <div id="scenarios" class="content-section">
+            <h2 class="section-title">🎯 Real-World Scenarios</h2>
+
+            <div class="subsection">
+                <h3>🤖 Scenario A: Training Large Language Model (Cloud)</h3>
+                
+                <div class="resource-card">
+                    <h4>📊 Requirements: 20B Parameter LLM</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>🖥️ Compute</strong><br/>
+                            64 A100 GPUs (8 nodes)<br/>
+                            3 days training<br/>
+                            Cost: ~$13,824
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>🌐 Network</strong><br/>
+                            100 Gbps interconnect<br/>
+                            AWS EFA or InfiniBand<br/>
+                            AllReduce optimization
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>💾 Storage</strong><br/>
+                            1TB training corpus<br/>
+                            S3 + local SSD cache<br/>
+                            Streaming tokenization
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>💰 FinOps</strong><br/>
+                            Spot instances (70% savings)<br/>
+                            Checkpointing strategy<br/>
+                            Budget alerts at $15k
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>📈 Performance Results</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <p><strong>Achieved:</strong> ~70% GPU utilization</p>
+                        <p><strong>Bottleneck:</strong> Occasional data loading delays</p>
+                        <p><strong>Solution:</strong> Increased data loader workers + tokenization caching</p>
+                        <p><strong>Deployment:</strong> 2-4 GPUs for inference with batching and quantization</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🚁 Scenario B: Edge Computer Vision (Drone)</h3>
+                
+                <div class="resource-card">
+                    <h4>🎯 Real-time Object Detection on Drone</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>🧠 Model</strong><br/>
+                            MobileNet/SqueezeNet<br/>
+                            0.5MB model size<br/>
+                            50x fewer parameters
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>⚡ Hardware</strong><br/>
+                            NVIDIA Jetson Xavier NX<br/>
+                            0.5-1 TFLOPs<br/>
+                            10-30W power draw
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>📡 Connectivity</strong><br/>
+                            Minimal cloud dependency<br/>
+                            On-device processing<br/>
+                            Occasional result upload
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>⚖️ Trade-offs</strong><br/>
+                            Lower accuracy vs speed<br/>
+                            Hardware cost vs bandwidth<br/>
+                            Autonomy vs connectivity
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>🎯 Edge Computing Reality</h3>
+                    <p>Edge requires trade-offs: smaller models mean lower accuracy, but enable real-time response and reduce bandwidth costs. Consider model distillation to improve small model performance.</p>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🌐 Scenario C: Scalable Web Service (Vision + NLP)</h3>
+                
+                <div class="resource-card">
+                    <h4>🔄 Image Captioning Pipeline</h4>
+                    <div class="diagram">
+                        <div class="flow-diagram">
+                            <div class="flow-box">User Image<br/>📸</div>
+                            <div class="arrow">→</div>
+                            <div class="flow-box">CNN (T4 GPU)<br/>🖼️</div>
+                            <div class="arrow">→</div>
+                            <div class="flow-box">Message Queue<br/>📬</div>
+                            <div class="arrow">→</div>
+                            <div class="flow-box">LLM (A100)<br/>📝</div>
+                            <div class="arrow">→</div>
+                            <div class="flow-box">Caption<br/>✨</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>🏗️ Architecture Details</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <ul>
+                            <li><strong>Decoupled stages:</strong> CV and NLP scale independently</li>
+                            <li><strong>Ratio:</strong> 2 CV GPUs per 1 NLP GPU (workload dependent)</li>
+                            <li><strong>Batching:</strong> Group requests for better GPU utilization</li>
+                            <li><strong>Auto-scaling:</strong> Kubernetes adds instances based on load</li>
+                            <li><strong>Target utilization:</strong> 60-70% steady state with spike headroom</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculators Section -->
+        <div id="calculators" class="content-section">
+            <h2 class="section-title">🧮 Resource Calculators</h2>
+
+            <div class="subsection">
+                <h3>🖥️ GPU Memory Calculator for LLMs</h3>
+                <div class="calculator">
+                    <h4>Estimate GPU Memory Requirements</h4>
+                    <input type="number" id="modelParams" placeholder="Model Parameters (in billions)" value="7">
+                    <select id="precision">
+                        <option value="4">FP32 (4 bytes)</option>
+                        <option value="2" selected>FP16 (2 bytes)</option>
+                        <option value="1">INT8 (1 byte)</option>
+                    </select>
+                    <input type="number" id="batchSize" placeholder="Batch Size" value="1">
+                    <input type="number" id="seqLength" placeholder="Sequence Length" value="2048">
+                    <button class="calc-button" onclick="calculateGPUMemory()">Calculate Memory</button>
+                    <div id="memoryResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>💰 Training Cost Estimator</h3>
+                <div class="calculator">
+                    <h4>Estimate Training Costs</h4>
+                    <input type="number" id="numGPUs" placeholder="Number of GPUs" value="8">
+                    <select id="gpuType">
+                        <option value="0.5">T4 (~$0.50/hr)</option>
+                        <option value="1.5">V100 (~$1.50/hr)</option>
+                        <option value="3.0" selected>A100 (~$3.00/hr)</option>
+                        <option value="4.0">H100 (~$4.00/hr)</option>
+                    </select>
+                    <input type="number" id="trainingHours" placeholder="Training Hours" value="24">
+                    <input type="number" id="spotDiscount" placeholder="Spot Discount %" value="70">
+                    <button class="calc-button" onclick="calculateTrainingCost()">Calculate Cost</button>
+                    <div id="costResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>📊 Storage Throughput Calculator</h3>
+                <div class="calculator">
+                    <h4>Calculate Required Storage Bandwidth</h4>
+                    <input type="number" id="numTrainingGPUs" placeholder="Number of Training GPUs" value="64">
+                    <input type="number" id="dataRatePerGPU" placeholder="Data Rate per GPU (MB/s)" value="500">
+                    <select id="safetyFactor">
+                        <option value="1.2">20% Safety Margin</option>
+                        <option value="1.5" selected>50% Safety Margin</option>
+                        <option value="2.0">100% Safety Margin</option>
+                    </select>
+                    <button class="calc-button" onclick="calculateStorageThroughput()">Calculate Throughput</button>
+                    <div id="throughputResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🌐 Network Bandwidth Calculator</h3>
+                <div class="calculator">
+                    <h4>Estimate AllReduce Bandwidth Needs</h4>
+                    <input type="number" id="modelSize" placeholder="Model Size (GB)" value="20">
+                    <input type="number" id="clusterGPUs" placeholder="Number of GPUs" value="64">
+                    <input type="number" id="stepsPerSec" placeholder="Training Steps/Sec" value="1">
+                    <button class="calc-button" onclick="calculateNetworkBandwidth()">Calculate Bandwidth</button>
+                    <div id="bandwidthResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💡 Calculator Notes</h3>
+                <ul>
+                    <li><strong>Memory estimates</strong> include model weights, activations, and overhead</li>
+                    <li><strong>Costs</strong> are approximations; actual cloud pricing varies by region and time</li>
+                    <li><strong>Storage</strong> calculations assume streaming workloads during training</li>
+                    <li><strong>Network</strong> estimates are for gradient synchronization in data parallel training</li>
+                </ul>
+            </div>
+        </div>
+
+        <button class="back-to-top" onclick="scrollToTop()">↑</button>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleContent(element) {
+            const body = element.querySelector('.toggle-body');
+            const icon = element.querySelector('.toggle-header span:last-child');
+            
+            if (body.classList.contains('active')) {
+                body.classList.remove('active');
+                icon.textContent = '+';
+            } else {
+                body.classList.add('active');
+                icon.textContent = '−';
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function calculateGPUMemory() {
+            const params = parseFloat(document.getElementById('modelParams').value);
+            const precision = parseFloat(document.getElementById('precision').value);
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+            const seqLength = parseInt(document.getElementById('seqLength').value);
+            
+            // Model weights
+            const modelMemory = params * precision;
+            
+            // Activations (rough estimate)
+            const activationMemory = (batchSize * seqLength * params * 0.001 * precision) / 1000;
+            
+            // Overhead (gradients, optimizer state for training)
+            const overhead = modelMemory * 2; // Simplified: gradients + optimizer state
+            
+            const totalMemory = modelMemory + activationMemory + overhead;
+            
+            const result = document.getElementById('memoryResult');
+            result.innerHTML = `
+                <h4>Memory Requirements:</h4>
+                <p><strong>Model Weights:</strong> ${modelMemory.toFixed(1)} GB</p>
+                <p><strong>Activations:</strong> ${activationMemory.toFixed(1)} GB</p>
+                <p><strong>Training Overhead:</strong> ${overhead.toFixed(1)} GB</p>
+                <p><strong>Total (Training):</strong> ${totalMemory.toFixed(1)} GB</p>
+                <p><strong>Inference Only:</strong> ${(modelMemory + activationMemory).toFixed(1)} GB</p>
+                <p style="margin-top: 10px;"><em>Recommendation: ${totalMemory > 80 ? 'Multiple GPUs or model sharding required' : totalMemory > 40 ? 'Use 80GB GPU for training' : 'Can fit on 40GB GPU'}</em></p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function calculateTrainingCost() {
+            const numGPUs = parseInt(document.getElementById('numGPUs').value);
+            const hourlyRate = parseFloat(document.getElementById('gpuType').value);
+            const hours = parseFloat(document.getElementById('trainingHours').value);
+            const spotDiscount = parseFloat(document.getElementById('spotDiscount').value) / 100;
+            
+            const baseCost = numGPUs * hourlyRate * hours;
+            const spotCost = baseCost * (1 - spotDiscount);
+            const monthlyCost = baseCost * (24 * 30); // If running 24/7
+            
+            const result = document.getElementById('costResult');
+            result.innerHTML = `
+                <h4>Training Cost Breakdown:</h4>
+                <p><strong>Base Cost:</strong> ${baseCost.toFixed(2)}</p>
+                <p><strong>With Spot (${(spotDiscount*100)}% off):</strong> ${spotCost.toFixed(2)}</p>
+                <p><strong>Savings:</strong> ${(baseCost - spotCost).toFixed(2)}</p>
+                <p><strong>If 24/7 monthly:</strong> ${monthlyCost.toFixed(2)}</p>
+                <p style="margin-top: 10px;"><em>💡 Tip: Use spot instances for fault-tolerant training with checkpointing</em></p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function calculateStorageThroughput() {
+            const gpus = parseInt(document.getElementById('numTrainingGPUs').value);
+            const ratePerGPU = parseFloat(document.getElementById('dataRatePerGPU').value);
+            const safety = parseFloat(document.getElementById('safetyFactor').value);
+            
+            const totalRate = gpus * ratePerGPU * safety;
+            const gbps = totalRate / 1000;
+            
+            const result = document.getElementById('throughputResult');
+            result.innerHTML = `
+                <h4>Storage Requirements:</h4>
+                <p><strong>Base Throughput:</strong> ${(gpus * ratePerGPU / 1000).toFixed(1)} GB/s</p>
+                <p><strong>With Safety Margin:</strong> ${gbps.toFixed(1)} GB/s</p>
+                <p><strong>Total IOPS (4KB):</strong> ${(totalRate * 1000 / 4).toLocaleString()}</p>
+                <p style="margin-top: 10px;"><em>🏗️ Architecture: ${gbps > 50 ? 'Parallel distributed storage required' : gbps > 10 ? 'High-performance NAS or multiple storage nodes' : 'Single high-end storage node may suffice'}</em></p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function calculateNetworkBandwidth() {
+            const modelSize = parseFloat(document.getElementById('modelSize').value);
+            const gpus = parseInt(document.getElementById('clusterGPUs').value);
+            const stepsPerSec = parseFloat(document.getElementById('stepsPerSec').value);
+            
+            // AllReduce requires 2x model size communication (send + receive)
+            const allReduceData = modelSize * 2 * stepsPerSec;
+            const bandwidthGbps = allReduceData * 8; // Convert GB/s to Gbps
+            
+            const result = document.getElementById('bandwidthResult');
+            result.innerHTML = `
+                <h4>Network Bandwidth Requirements:</h4>
+                <p><strong>Model Size:</strong> ${modelSize} GB</p>
+                <p><strong>AllReduce per Step:</strong> ${(modelSize * 2).toFixed(1)} GB</p>
+                <p><strong>Required Bandwidth:</strong> ${bandwidthGbps.toFixed(1)} Gbps per GPU</p>
+                <p><strong>Aggregate Cluster:</strong> ${(bandwidthGbps * gpus / 2).toFixed(0)} Gbps</p>
+                <p style="margin-top: 10px;"><em>🌐 Network: ${bandwidthGbps > 200 ? 'InfiniBand HDR/NDR required' : bandwidthGbps > 100 ? 'InfiniBand or 400GbE needed' : bandwidthGbps > 25 ? '100GbE minimum' : '25GbE may suffice'}</em></p>
+            `;
+            result.style.display = 'block';
+        }
+
+        // Initialize with overview section
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('overview');
+        });
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Add visual feedback
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Add floating action button for quick access to calculators
+        function createQuickAccess() {
+            const quickAccess = document.createElement('div');
+            quickAccess.style.cssText = `
+                position: fixed;
+                bottom: 100px;
+                right: 30px;
+                background: linear-gradient(45deg, #28a745, #20c997);
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+                cursor: pointer;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            `;
+            quickAccess.innerHTML = '🧮';
+            quickAccess.title = 'Quick Access to Calculators';
+            quickAccess.onclick = () => showSection('calculators');
+            
+            quickAccess.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+                this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.4)';
+            });
+            
+            quickAccess.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+            });
+            
+            document.body.appendChild(quickAccess);
+        }
+
+        // Add progress indicator
+        function createProgressIndicator() {
+            const progress = document.createElement('div');
+            progress.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 0%;
+                height: 4px;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                z-index: 1001;
+                transition: width 0.3s ease;
+            `;
+            progress.id = 'scrollProgress';
+            document.body.appendChild(progress);
+
+            window.addEventListener('scroll', function() {
+                const scrolled = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+                progress.style.width = scrolled + '%';
+            });
+        }
+
+        // Initialize additional features
+        setTimeout(() => {
+            createQuickAccess();
+            createProgressIndicator();
+        }, 1000);
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey) {
+                switch(e.key) {
+                    case '1': showSection('overview'); break;
+                    case '2': showSection('compute'); break;
+                    case '3': showSection('storage'); break;
+                    case '4': showSection('networking'); break;
+                    case '5': showSection('benchmarking'); break;
+                    case '6': showSection('finops'); break;
+                    case '7': showSection('scenarios'); break;
+                    case '8': showSection('calculators'); break;
+                }
+            }
+        });
+
+        // Add section shortcuts display
+        function showKeyboardShortcuts() {
+            const shortcuts = document.createElement('div');
+            shortcuts.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 15px;
+                border-radius: 10px;
+                font-size: 0.9rem;
+                z-index: 1000;
+                display: none;
+            `;
+            shortcuts.innerHTML = `
+                <strong>⌨️ Keyboard Shortcuts:</strong><br/>
+                Alt + 1-8: Navigate sections<br/>
+                <small>Hold Alt and press a number</small>
+            `;
+            shortcuts.id = 'keyboardHelp';
+            document.body.appendChild(shortcuts);
+
+            // Show on hover over navigation
+            const nav = document.querySelector('.navigation');
+            nav.addEventListener('mouseenter', () => {
+                shortcuts.style.display = 'block';
+            });
+            nav.addEventListener('mouseleave', () => {
+                shortcuts.style.display = 'none';
+            });
+        }
+
+        setTimeout(showKeyboardShortcuts, 1500);
+    </script>
+</body>
+</html>
+            
+
+            <div class="subsection">
+                <h3>🏭 Specialized AI Hardware</h3>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Hardware Type</th>
+                            <th>Vendor</th>
+                            <th>Best Use Case</th>
+                            <th>Trade-offs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>GPUs</strong></td>
+                            <td>NVIDIA, AMD</td>
+                            <td>Versatile training & inference</td>
+                            <td>High power consumption</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TPUs</strong></td>
+                            <td>Google</td>
+                            <td>Matrix operations, Google Cloud</td>
+                            <td>Limited ecosystem</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FPGAs</strong></td>
+                            <td>Intel, Xilinx</td>
+                            <td>Low-latency inference</td>
+                            <td>Complex programming</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Edge AI Chips</strong></td>
+                            <td>Apple, Google, NVIDIA</td>
+                            <td>Mobile/edge inference</td>
+                            <td>Limited compute power</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💡 Pro Tip: Energy Considerations</h3>
+                <p>High-end GPUs can draw 300-400W each. For edge deployments, consider specialized low-power accelerators like NVIDIA Jetson or mobile NPUs for energy-efficient inference.</p>
+            </div>
+        </div>
+
+        <!-- Storage Section -->
+        <div id="storage" class="content-section">
+            <h2 class="section-title">💾 Storage & Data Pipeline</h2>
+
+            <div class="highlight-box">
+                <h3>⚠️ Critical Insight</h3>
+                <p>Storage is often the bottleneck in optimized GPU clusters. If data pipeline can't keep up, expensive GPUs sit idle. A 100-GPU cluster might need 50GB/s aggregate storage throughput!</p>
+            </div>
+
+            <div class="subsection">
+                <h3>🏗️ Storage Technologies for ML</h3>
+                
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>🏢 On-Premise Solutions</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <ul>
+                            <li><strong>Distributed File Systems:</strong> Lustre, Ceph, NFS parallel servers</li>
+                            <li><strong>All-Flash Storage:</strong> NVMe clusters for maximum IOPS</li>
+                            <li><strong>GPUDirect Storage:</strong> Direct GPU-to-storage DMA, bypassing CPU</li>
+                            <li><strong>Example:</strong> Meta's Tectonic filesystem handles exabyte-scale data for thousands of GPUs</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>☁️ Cloud Storage Options</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <ul>
+                            <li><strong>Object Storage:</strong> S3, GCS for high sequential throughput</li>
+                            <li><strong>Managed Filesystems:</strong> AWS FSx for Lustre, Google Filestore</li>
+                            <li><strong>Local NVMe:</strong> Instance-attached SSDs for fastest access</li>
+                            <li><strong>Hybrid Caching:</strong> Local cache + remote object storage</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>📊 Data Pipeline Optimization</h3>
+                
+                <div class="diagram">
+                    <h4>High-Performance Data Pipeline</h4>
+                    <div class="flow-diagram">
+                        <div class="flow-box">Raw Data<br/>📁</div>
+                        <div class="arrow">→</div>
+                        <div class="flow-box">Parallel Storage<br/>💾</div>
+                        <div class="arrow">→</div>
+                        <div class="flow-box">Preprocessing<br/>⚙️</div>
+                        <div class="arrow">→</div>
+                        <div class="flow-box">GPU Memory<br/>🖥️</div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Key:</strong> Prefetching, streaming, and local caching keep GPUs fed with data</p>
+                </div>
+
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>🚀 Performance Best Practices</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <ul>
+                            <li><strong>Data Formats:</strong> Use efficient formats (Parquet, TFRecord) - one team cut storage costs 30% switching from CSV</li>
+                            <li><strong>Compression:</strong> Reduce I/O volume without CPU overhead</li>
+                            <li><strong>Prefetching:</strong> Load next batch while GPU processes current batch</li>
+                            <li><strong>Co-location:</strong> Keep data near compute to avoid cross-region transfer fees</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>🔄 Checkpointing Strategy</h3>
+                <p>Large models require efficient checkpointing for fault tolerance. With multi-GB checkpoints and many GPUs, this can flood storage systems.</p>
+                
+                <div class="resource-card">
+                    <h4>📈 MLPerf Storage Example</h4>
+                    <p>A 32-node all-flash cluster successfully served 1,056 NVIDIA H100 GPUs for ResNet-50 training, demonstrating linear scalability with proper storage design.</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💰 Cost Optimization Tips</h3>
+                <ul>
+                    <li>Use tiered storage: hot data on SSDs, archive on cheaper storage</li>
+                    <li>Avoid unnecessary cross-region data duplication</li>
+                    <li>Monitor storage IOPS and egress costs in cloud deployments</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Networking Section -->
+        <div id="networking" class="content-section">
+            <h2 class="section-title">🌐 Networking & Distributed Training</h2>
+
+            <div class="subsection">
+                <h3>⚡ High-Performance Network Technologies</h3>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Technology</th>
+                            <th>Bandwidth</th>
+                            <th>Latency</th>
+                            <th>Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>InfiniBand (HDR/NDR)</strong></td>
+                            <td>200-400 Gbps</td>
+                            <td>Sub-microsecond</td>
+                            <td>Large-scale training clusters</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RoCE Ethernet</strong></td>
+                            <td>100-400 Gbps</td>
+                            <td>Low (with RDMA)</td>
+                            <td>Cost-effective alternative to IB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NVLink/NVSwitch</strong></td>
+                            <td>600 GB/s per GPU</td>
+                            <td>Nanoseconds</td>
+                            <td>Intra-node GPU communication</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Standard Ethernet</strong></td>
+                            <td>1-25 Gbps</td>
+                            <td>Higher</td>
+                            <td>Small clusters, inference</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="subsection">
+                <h3>🔄 Distributed Training Patterns</h3>
+                
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>📊 Data Parallelism</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <p><strong>How it works:</strong> Each GPU gets different data, computes gradients, then all-reduce to synchronize.</p>
+                        <p><strong>Network impact:</strong> Must transmit gradient tensor (= model size) every step.</p>
+                        <p><strong>Scaling challenge:</strong> Communication grows with model size and number of GPUs.</p>
+                    </div>
+                </div>
+
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>🧩 Model Parallelism</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <p><strong>How it works:</strong> Different GPUs hold different model parts, exchange activations.</p>
+                        <p><strong>Network impact:</strong> High bandwidth/low latency required for activation passing.</p>
+                        <p><strong>Use case:</strong> Models too large for single GPU memory.</p>
+                    </div>
+                </div>
+
+                <div class="toggle-content" onclick="toggleContent(this)">
+                    <div class="toggle-header">
+                        <span>⚡ Pipeline Parallelism</span>
+                        <span>+</span>
+                    </div>
+                    <div class="toggle-body">
+                        <p><strong>How it works:</strong> Model layers distributed across GPUs, data flows through pipeline.</p>
+                        <p><strong>Network impact:</strong> Sequential activation passing between pipeline stages.</p>
+                        <p><strong>Optimization:</strong> Overlap communication with computation.</p>
+                    </div>
+                </div>
+            
