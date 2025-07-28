@@ -5,417 +5,2064 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPU Mathematics for Machine Learning - Interactive Guide</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <style>
-        .section-content {
-            display: none;
-        }
-        .section-content.active {
-            display: block;
-        }
-        .nav-item.active {
-            background-color: #dbeafe;
-            color: #1d4ed8;
-            border: 1px solid #93c5fd;
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .calculator-card {
             background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             border: 1px solid #e5e7eb;
         }
         .input-field {
             width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             margin-bottom: 1rem;
+            transition: all 0.3s ease;
         }
         .input-field:focus {
             outline: none;
             border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         .result-display {
-            background-color: #eff6ff;
-            padding: 0.75rem;
-            border-radius: 0.375rem;
-            border: 1px solid #bfdbfe;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
             margin-bottom: 0.75rem;
+            border-left: 4px solid #3b82f6;
         }
         .grid-2 {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
         }
         .grid-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
         }
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            margin: 0.25rem;
+            border: none;
+            border-radius: 8px;
+            background: #f3f4f6;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-button:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+        .nav-button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .section-content {
+            display: none;
+        }
+        .section-content.active {
+            display: block;
+        }
+        .formula-box {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .highlight-stat {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        .progress-bar {
+            background: #e5e7eb;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            transition: width 0.3s ease;
         }
         @media (max-width: 768px) {
-            .grid-2, .grid-3, .grid-4 {
+            .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
             }
         }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .slider-container {
+            margin: 1rem 0;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e5e7eb;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .slider:hover {
+            opacity: 1;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        
+        .comparison-table {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .comparison-table th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+        
+        .performance-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .performance-excellent { background: #10b981; }
+        .performance-good { background: #3b82f6; }
+        .performance-fair { background: #f59e0b; }
+        .performance-poor { background: #ef4444; }
     </style>
 </head>
-<body class="min-h-screen bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex items-center">
-                <i data-lucide="calculator" class="w-8 h-8 text-blue-600 mr-3"></i>
-                <h1 class="text-xl font-bold text-gray-900">GPU Mathematics for Machine Learning</h1>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-12">
+        <div class="container mx-auto px-6">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">GPU Mathematics for Machine Learning</h1>
+            <p class="text-xl md:text-2xl opacity-90 max-w-4xl">
+                Master the mathematical foundations, scaling strategies, and optimization formulas that power modern AI from single GPUs to massive distributed clusters
+            </p>
+            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                    <div class="highlight-stat">16×</div>
+                    <div class="text-sm opacity-80">Performance Improvement</div>
+                </div>
+                <div>
+                    <div class="highlight-stat">1.2</div>
+                    <div class="text-sm opacity-80">PFLOPS Peak</div>
+                </div>
+                <div>
+                    <div class="highlight-stat">95%</div>
+                    <div class="text-sm opacity-80">Matrix Operations</div>
+                </div>
+                <div>
+                    <div class="highlight-stat">3.35</div>
+                    <div class="text-sm opacity-80">TB/s Memory</div>
+                </div>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Sidebar -->
-            <div class="lg:w-64 lg:flex-shrink-0">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Sections</h2>
-                    <nav class="space-y-2">
-                        <button class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors active" onclick="showSection('overview')">
-                            <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3"></i>
-                            Overview
-                        </button>
-                        <button class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50" onclick="showSection('hardware')">
-                            <i data-lucide="cpu" class="w-4 h-4 mr-3"></i>
-                            Hardware Fundamentals
-                        </button>
-                        <button class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50" onclick="showSection('memory')">
-                            <i data-lucide="memory-stick" class="w-4 h-4 mr-3"></i>
-                            Memory Optimization
-                        </button>
-                        <button class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50" onclick="showSection('architectures')">
-                            <i data-lucide="settings" class="w-4 h-4 mr-3"></i>
-                            NN Architectures
-                        </button>
-                        <button class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50" onclick="showSection('distributed')">
-                            <i data-lucide="network" class="w-4 h-4 mr-3"></i>
-                            Distributed Training
-                        </button>
-                        <button class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50" onclick="showSection('cost')">
-                            <i data-lucide="dollar-sign" class="w-4 h-4 mr-3"></i>
-                            Cost Analysis
-                        </button>
-                        <button class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50" onclick="showSection('optimization')">
-                            <i data-lucide="zap" class="w-4 h-4 mr-3"></i>
-                            Advanced Optimization
-                        </button>
-                    </nav>
+    <!-- Navigation -->
+    <div class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex flex-wrap justify-center">
+                <button class="nav-button active" onclick="showSection('foundations')">GPU Foundations</button>
+                <button class="nav-button" onclick="showSection('memory')">Memory Calculations</button>
+                <button class="nav-button" onclick="showSection('distributed')">Distributed Training</button>
+                <button class="nav-button" onclick="showSection('flops')">FLOPS Analysis</button>
+                <button class="nav-button" onclick="showSection('cost')">Cost Mathematics</button>
+                <button class="nav-button" onclick="showSection('optimization')">Optimization</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Dashboard -->
+    <div class="bg-white shadow-sm py-6">
+        <div class="container mx-auto px-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Real-Time Performance Dashboard</h2>
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                <div class="metric-card">
+                    <div class="text-sm text-gray-600">Current GPU Efficiency</div>
+                    <div class="text-2xl font-bold text-blue-600" id="dashboardEfficiency">75.2%</div>
+                    <div class="performance-indicator performance-good"></div>
+                </div>
+                <div class="metric-card">
+                    <div class="text-sm text-gray-600">Memory Utilization</div>
+                    <div class="text-2xl font-bold text-green-600" id="dashboardMemory">68.4%</div>
+                    <div class="performance-indicator performance-good"></div>
+                </div>
+                <div class="metric-card">
+                    <div class="text-sm text-gray-600">Training Speed</div>
+                    <div class="text-2xl font-bold text-purple-600" id="dashboardSpeed">342 tok/s</div>
+                    <div class="performance-indicator performance-excellent"></div>
+                </div>
+                <div class="metric-card">
+                    <div class="text-sm text-gray-600">Cost Efficiency</div>
+                    <div class="text-2xl font-bold text-yellow-600" id="dashboardCost">$0.045</div>
+                    <div class="performance-indicator performance-fair"></div>
+                </div>
+                <div class="metric-card">
+                    <div class="text-sm text-gray-600">Scale Factor</div>
+                    <div class="text-2xl font-bold text-indigo-600" id="dashboardScale">6.8×</div>
+                    <div class="performance-indicator performance-good"></div>
+                </div>
+                <div class="metric-card">
+                    <div class="text-sm text-gray-600">Overall Score</div>
+                    <div class="text-2xl font-bold text-emerald-600" id="dashboardScore">8.4/10</div>
+                    <div class="performance-indicator performance-excellent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-8">
+        
+        <!-- GPU Foundations Section -->
+        <div id="foundations" class="section-content active">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">GPU Architectural Foundations</h2>
+            
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Tensor Core Performance Calculator</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Matrix Size (N×N)</label>
+                        <input type="number" id="matrixSize" value="4096" class="input-field" oninput="updateTensorCoreCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Precision</label>
+                        <select id="precision" class="input-field" onchange="updateTensorCoreCalc()">
+                            <option value="fp32">FP32</option>
+                            <option value="fp16" selected>FP16</option>
+                            <option value="fp8">FP8</option>
+                            <option value="int8">INT8</option>
+                        </select>
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">GPU Type</label>
+                        <select id="gpuType" class="input-field" onchange="updateTensorCoreCalc()">
+                            <option value="h100">H100</option>
+                            <option value="a100">A100</option>
+                            <option value="v100">V100</option>
+                            <option value="rtx4090">RTX 4090</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Operations Count</div>
+                            <div class="text-lg font-semibold text-blue-800" id="operationsCount">137.4 GFLOPS</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Execution Time</div>
+                            <div class="text-lg font-semibold text-blue-800" id="executionTime">0.034 ms</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Memory Required</div>
+                            <div class="text-lg font-semibold text-blue-800" id="memoryRequired">201.3 MB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Arithmetic Intensity</div>
+                            <div class="text-lg font-semibold text-blue-800" id="arithmeticIntensity">682.7 ops/byte</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formula-box">
+                    <div class="text-center text-lg font-semibold mb-2">GEMM Formula: C = αAB + βC</div>
+                    <div class="text-sm">Operations = 2 × N³ (for N×N matrices)</div>
+                    <div class="text-sm">Memory = 3 × N² × bytes_per_element</div>
+                    <div class="text-sm">Arithmetic Intensity = Operations / Memory_transferred</div>
+                </div>
+                
+                <!-- Performance Scaling Chart -->
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
                 </div>
             </div>
 
-            <!-- Main Content -->
-            <div class="flex-1">
-                <!-- Overview Section -->
-                <div id="overview" class="section-content active">
-                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-lg mb-6">
-                        <h2 class="text-3xl font-bold mb-4">GPU Mathematics for ML</h2>
-                        <p class="text-xl opacity-90">
-                            Master the mathematical foundations that determine ML performance, costs, and scalability
-                        </p>
-                    </div>
-
-                    <div class="grid-3 mb-6">
-                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                            <i data-lucide="cpu" class="w-12 h-12 text-blue-600 mb-4"></i>
-                            <h3 class="text-lg font-semibold mb-2">Hardware Fundamentals</h3>
-                            <p class="text-gray-600">CUDA vs Tensor cores, memory hierarchy, and architectural performance characteristics</p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                            <i data-lucide="memory-stick" class="w-12 h-12 text-green-600 mb-4"></i>
-                            <h3 class="text-lg font-semibold mb-2">Memory Optimization</h3>
-                            <p class="text-gray-600">Precision scaling, batch optimization, and gradient checkpointing mathematics</p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                            <i data-lucide="network" class="w-12 h-12 text-purple-600 mb-4"></i>
-                            <h3 class="text-lg font-semibold mb-2">Distributed Training</h3>
-                            <p class="text-gray-600">Communication overhead, scaling laws, and parallelism strategies</p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                            <i data-lucide="settings" class="w-12 h-12 text-red-600 mb-4"></i>
-                            <h3 class="text-lg font-semibold mb-2">NN Architectures</h3>
-                            <p class="text-gray-600">Architecture-specific optimizations for CNNs, Transformers, RNNs, and more</p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                            <i data-lucide="dollar-sign" class="w-12 h-12 text-yellow-600 mb-4"></i>
-                            <h3 class="text-lg font-semibold mb-2">Cost Analysis</h3>
-                            <p class="text-gray-600">TCO calculations, cloud vs on-premise economics, and ROI optimization</p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                            <i data-lucide="zap" class="w-12 h-12 text-orange-600 mb-4"></i>
-                            <h3 class="text-lg font-semibold mb-2">Advanced Optimization</h3>
-                            <p class="text-gray-600">FlashAttention, kernel fusion, quantization, and cutting-edge techniques</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-amber-800 mb-2">Key Insight</h3>
-                        <p class="text-amber-700">
-                            Understanding GPU mathematics can improve performance by 2-4x while reducing costs by 30-50%, 
-                            creating sustainable competitive advantages in AI-driven markets.
-                        </p>
-                    </div>
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Architecture Comparison</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-300">
+                                <th class="text-left p-3">Architecture</th>
+                                <th class="text-left p-3">Parallelization</th>
+                                <th class="text-left p-3">Memory Pattern</th>
+                                <th class="text-left p-3">GPU Utilization</th>
+                                <th class="text-left p-3">Tensor Core Benefit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-200">
+                                <td class="p-3 font-medium">Transformers</td>
+                                <td class="p-3">Excellent</td>
+                                <td class="p-3">Large matrix ops</td>
+                                <td class="p-3 text-green-600">70-85%</td>
+                                <td class="p-3 text-green-600">8× speedup</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="p-3 font-medium">CNNs</td>
+                                <td class="p-3">Excellent</td>
+                                <td class="p-3">Regular, coalesced</td>
+                                <td class="p-3 text-green-600">80-95%</td>
+                                <td class="p-3 text-green-600">4× speedup</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="p-3 font-medium">RNNs/LSTMs</td>
+                                <td class="p-3">Limited</td>
+                                <td class="p-3">Sequential dependencies</td>
+                                <td class="p-3 text-yellow-600">10-40%</td>
+                                <td class="p-3 text-red-600">Minimal</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="p-3 font-medium">GNNs</td>
+                                <td class="p-3">Poor</td>
+                                <td class="p-3">Irregular, sparse</td>
+                                <td class="p-3 text-red-600">10-30%</td>
+                                <td class="p-3 text-red-600">None</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-
-                <!-- Hardware Section -->
-                <div id="hardware" class="section-content">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Hardware Fundamentals</h2>
-                    
-                    <div class="calculator-card">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-800">GPU Performance Calculator</h3>
-                        <div class="grid-2">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">CUDA Cores</label>
-                                <input type="number" id="cudaCores" value="5120" class="input-field" oninput="updateHardwareCalculations()">
-                                
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Tensor Cores</label>
-                                <input type="number" id="tensorCores" value="432" class="input-field" oninput="updateHardwareCalculations()">
-                                
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Base Clock Speed (GHz)</label>
-                                <input type="number" step="0.1" id="clockSpeed" value="1.4" class="input-field" oninput="updateHardwareCalculations()">
-                                
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Memory Bandwidth (GB/s)</label>
-                                <input type="number" id="memoryBandwidth" value="1555" class="input-field" oninput="updateHardwareCalculations()">
-                            </div>
-                            
-                            <div>
-                                <div class="result-display">
-                                    <div class="text-sm text-gray-600">CUDA Core Performance (FP32)</div>
-                                    <div class="text-lg font-semibold text-blue-800" id="cudaPerformance">14.3 TFLOPS</div>
-                                </div>
-                                <div class="result-display">
-                                    <div class="text-sm text-gray-600">Tensor Core Performance (FP16)</div>
-                                    <div class="text-lg font-semibold text-blue-800" id="tensorPerformance">387.1 TFLOPS</div>
-                                </div>
-                                <div class="result-display">
-                                    <div class="text-sm text-gray-600">Tensor Core Speedup</div>
-                                    <div class="text-lg font-semibold text-blue-800" id="tensorSpeedup">27.1x</div>
-                                </div>
-                                <div class="result-display">
-                                    <div class="text-sm text-gray-600">Memory Bandwidth</div>
-                                    <div class="text-lg font-semibold text-blue-800" id="bandwidth">1,555 GB/s</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                            <h4 class="font-semibold text-blue-800 mb-2">Key Insights:</h4>
-                            <ul class="text-blue-700 space-y-1">
-                                <li>• Tensor cores provide 27x+ speedup for mixed-precision operations</li>
-                                <li>• Each tensor core processes 4×4 matrix tiles in a single operation</li>
-                                <li>• Memory bandwidth often becomes the bottleneck for large models</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="calculator-card">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Memory Hierarchy Analysis</h3>
-                        <div class="grid-4 mb-4">
-                            <div class="bg-green-100 p-4 rounded-lg text-center">
-                                <div class="font-semibold text-green-800">Registers</div>
-                                <div class="text-sm text-green-600">0 cycles</div>
-                                <div class="text-xs text-green-600">~65KB per SM</div>
-                            </div>
-                            <div class="bg-blue-100 p-4 rounded-lg text-center">
-                                <div class="font-semibold text-blue-800">Shared Memory</div>
-                                <div class="text-sm text-blue-600">1-3 cycles</div>
-                                <div class="text-xs text-blue-600">48-164KB per SM</div>
-                            </div>
-                            <div class="bg-yellow-100 p-4 rounded-lg text-center">
-                                <div class="font-semibold text-yellow-800">L2 Cache</div>
-                                <div class="text-sm text-yellow-600">~30 cycles</div>
-                                <div class="text-xs text-yellow-600">40-60MB total</div>
-                            </div>
-                            <div class="bg-red-100 p-4 rounded-lg text-center">
-                                <div class="font-semibold text-red-800">Global Memory</div>
-                                <div class="text-sm text-red-600">200-800 cycles</div>
-                                <div class="text-xs text-red-600">16-80GB capacity</div>
-                            </div>
-                        </div>
-                        
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <h4 class="font-semibold mb-2">Roofline Performance Model:</h4>
-                            <div class="text-sm text-gray-700">
-                                Performance = min(Peak FLOPS, Arithmetic Intensity × Memory Bandwidth)
-                            </div>
-                            <div class="text-xs text-gray-600 mt-1">
-                                Operations with low arithmetic intensity become memory-bound
-                            </div>
-                        </div>
-                    </div>
+            </div>
+            
+            <!-- Interactive Benchmark Comparison -->
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">GPU Performance Benchmark</h3>
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>GPU Model</th>
+                                <th>Memory</th>
+                                <th>FP32 TFLOPS</th>
+                                <th>FP16 TFLOPS</th>
+                                <th>Memory BW</th>
+                                <th>Power</th>
+                                <th>Price</th>
+                                <th>Performance Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="benchmarkTable">
+                            <tr>
+                                <td><strong>H100 SXM</strong></td>
+                                <td>80GB HBM3</td>
+                                <td>67</td>
+                                <td>1,979</td>
+                                <td>3.35 TB/s</td>
+                                <td>700W</td>
+                                <td>$30,000</td>
+                                <td><span class="performance-indicator performance-excellent"></span>9.8/10</td>
+                            </tr>
+                            <tr>
+                                <td><strong>A100 SXM</strong></td>
+                                <td>80GB HBM2e</td>
+                                <td>19.5</td>
+                                <td>312</td>
+                                <td>2.0 TB/s</td>
+                                <td>400W</td>
+                                <td>$15,000</td>
+                                <td><span class="performance-indicator performance-good"></span>8.5/10</td>
+                            </tr>
+                            <tr>
+                                <td><strong>V100 SXM</strong></td>
+                                <td>32GB HBM2</td>
+                                <td>15.7</td>
+                                <td>125</td>
+                                <td>900 GB/s</td>
+                                <td>300W</td>
+                                <td>$8,000</td>
+                                <td><span class="performance-indicator performance-fair"></span>6.8/10</td>
+                            </tr>
+                            <tr>
+                                <td><strong>RTX 4090</strong></td>
+                                <td>24GB GDDR6X</td>
+                                <td>35</td>
+                                <td>165</td>
+                                <td>1.0 TB/s</td>
+                                <td>450W</td>
+                                <td>$1,600</td>
+                                <td><span class="performance-indicator performance-good"></span>7.2/10</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-
-                <!-- Memory Section -->
-                <div id="memory" class="section-content">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Memory Optimization</h2>
-                    
-                    <div class="calculator-card">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Memory Requirements Calculator</h3>
-                        <div class="grid-2">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Model Parameters (B)</label>
-                                <input type="number" id="modelParams" value="175" class="input-field" oninput="updateMemoryCalculations()">
-                                
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Batch Size</label>
-                                <input type="number" id="batchSize" value="32" class="input-field" oninput="updateMemoryCalculations()">
-                                
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Sequence Length</label>
-                                <input type="number" id="seqLength" value="2048" class="input-field" oninput="updateMemoryCalculations()">
-                                
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Hidden Size</label>
-                                <input type="number" id="hiddenSize" value="12288" class="input-field" oninput="updateMemoryCalculations()">
-                                
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Precision</label>
-                                <select id="precision" class="input-field" onchange="updateMemoryCalculations()">
-                                    <option value="fp32">FP32</option>
-                                    <option value="fp16">FP16</option>
-                                    <option value="mixed" selected>Mixed Precision</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <div class="result-display">
-                                    <div class="text-sm text-gray-600">Model Weights</div>
-                                    <div class="text-lg font-semibold text-blue-800" id="weightMemory">350.0 GB</div>
-                                </div>
-                                <div class="result-display">
-                                    <div class="text-sm text-gray-600">Optimizer States</div>
-                                    <div class="text-lg font-semibold text-blue-800" id="optimizerMemory">2,450.0 GB</div>
-                                </div>
-                                <div class="result-display">
-                                    <div class="text-sm text-gray-600">Activations (per batch)</div>
-                                    <div class="text-lg font-semibold text-blue-800" id="activationMemory">1.5 GB</div>
-                                </div>
-                                <div class="result-display">
-                                    <div class="text-sm text-gray-600">Total Training Memory</div>
-                                    <div class="text-lg font-semibold text-blue-800" id="totalMemory">2,451.5 GB</div>
-                                </div>
-                                <div class="result-display">
-                                    <div class="text-sm text-gray-600">Memory per Parameter</div>
-                                    <div class="text-lg font-semibold text-blue-800" id="memoryPerParam">18 bytes</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-6 grid-3">
-                            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                                <h4 class="font-semibold text-green-800 mb-2">FP32 Training</h4>
-                                <div class="text-sm text-green-700">
-                                    12 bytes per parameter<br/>
-                                    Highest precision<br/>
-                                    Largest memory usage
-                                </div>
-                            </div>
-                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                <h4 class="font-semibold text-blue-800 mb-2">FP16 Training</h4>
-                                <div class="text-sm text-blue-700">
-                                    6 bytes per parameter<br/>
-                                    50% memory reduction<br/>
-                                    Potential instability
-                                </div>
-                            </div>
-                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                <h4 class="font-semibold text-purple-800 mb-2">Mixed Precision</h4>
-                                <div class="text-sm text-purple-700">
-                                    18 bytes per parameter<br/>
-                                    Best stability/efficiency<br/>
-                                    Industry standard
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Other sections would continue here with similar structure -->
-                <!-- Architectures, Distributed, Cost, Optimization sections -->
                 
+                <!-- Live Performance Comparison Chart -->
+                <div class="chart-container">
+                    <canvas id="benchmarkChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Calculations Section -->
+        <div id="memory" class="section-content">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Memory Calculations</h2>
+            
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Training Memory Calculator</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model Parameters (Billions)</label>
+                        <input type="number" id="modelParams" value="175" class="input-field" oninput="updateMemoryCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Batch Size</label>
+                        <input type="number" id="batchSize" value="32" class="input-field" oninput="updateMemoryCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Sequence Length</label>
+                        <input type="number" id="seqLength" value="2048" class="input-field" oninput="updateMemoryCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Hidden Dimension</label>
+                        <input type="number" id="hiddenDim" value="12288" class="input-field" oninput="updateMemoryCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Number of Layers</label>
+                        <input type="number" id="numLayers" value="96" class="input-field" oninput="updateMemoryCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Training Mode</label>
+                        <select id="trainingMode" class="input-field" onchange="updateMemoryCalc()">
+                            <option value="fp32">FP32 Standard</option>
+                            <option value="mixed" selected>Mixed Precision</option>
+                            <option value="fp16">FP16 Full</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Model Parameters</div>
+                            <div class="text-lg font-semibold text-blue-800" id="paramMemory">700 GB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Gradient Memory</div>
+                            <div class="text-lg font-semibold text-blue-800" id="gradMemory">700 GB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Optimizer Memory</div>
+                            <div class="text-lg font-semibold text-blue-800" id="optimizerMemory">1400 GB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Activation Memory</div>
+                            <div class="text-lg font-semibold text-blue-800" id="activationMemory">2.4 TB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Total Memory Required</div>
+                            <div class="text-lg font-semibold text-red-600" id="totalMemory">5.2 TB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">GPUs Required (80GB each)</div>
+                            <div class="text-lg font-semibold text-blue-800" id="gpusRequired">65 GPUs</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formula-box">
+                    <div class="text-center text-lg font-semibold mb-2">Training Memory Formula</div>
+                    <div class="text-sm">Total = Parameters + Gradients + Optimizer + Activations</div>
+                    <div class="text-sm">Activations = B × S × H × L × (16 + 2/p) bytes</div>
+                    <div class="text-sm">Mixed Precision: 10 bytes/param vs FP32: 16 bytes/param</div>
+                </div>
+                
+                <!-- Memory Breakdown Chart -->
+                <div class="chart-container">
+                    <canvas id="memoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Parameter Counting for Transformers</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Vocabulary Size</label>
+                        <input type="number" id="vocabSize" value="50257" class="input-field" oninput="updateParamCount()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Embedding Dimension</label>
+                        <input type="number" id="embedDim" value="768" class="input-field" oninput="updateParamCount()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Position</label>
+                        <input type="number" id="maxPos" value="1024" class="input-field" oninput="updateParamCount()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Number of Layers</label>
+                        <input type="number" id="transformerLayers" value="12" class="input-field" oninput="updateParamCount()">
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Embedding Parameters</div>
+                            <div class="text-lg font-semibold text-blue-800" id="embeddingParams">39.0M</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Attention Parameters</div>
+                            <div class="text-lg font-semibold text-blue-800" id="attentionParams">84.9M</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">MLP Parameters</div>
+                            <div class="text-lg font-semibold text-blue-800" id="mlpParams">56.6M</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Total Parameters</div>
+                            <div class="text-lg font-semibold text-green-600" id="totalParams">124.4M</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formula-box">
+                    <div class="text-center text-lg font-semibold mb-2">Transformer Parameter Formula</div>
+                    <div class="text-sm">C = E(V + P) + L(12E² + 13E) + 2E</div>
+                    <div class="text-sm">E=embedding, V=vocab, P=position, L=layers</div>
+                    <div class="text-sm">12E² = attention weights, 8E² ≈ MLP (4E hidden dim)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distributed Training Section -->
+        <div id="distributed" class="section-content">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Distributed Training Mathematics</h2>
+            
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Scaling Efficiency Calculator</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Number of GPUs</label>
+                        <input type="number" id="numGPUs" value="8" class="input-field" oninput="updateDistributedCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model Size (GB)</label>
+                        <input type="number" id="modelSizeGB" value="350" class="input-field" oninput="updateDistributedCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Network Bandwidth (Gb/s)</label>
+                        <input type="number" id="networkBW" value="400" class="input-field" oninput="updateDistributedCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Compute Time per Step (ms)</label>
+                        <input type="number" id="computeTimeMS" value="100" class="input-field" oninput="updateDistributedCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Parallelism Strategy</label>
+                        <select id="parallelStrategy" class="input-field" onchange="updateDistributedCalc()">
+                            <option value="data">Data Parallel</option>
+                            <option value="tensor">Tensor Parallel</option>
+                            <option value="pipeline">Pipeline Parallel</option>
+                            <option value="hybrid" selected>Hybrid</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Communication Volume</div>
+                            <div class="text-lg font-semibold text-blue-800" id="commVolume">612.5 GB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Communication Time</div>
+                            <div class="text-lg font-semibold text-blue-800" id="commTime">12.25 s</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Scaling Efficiency</div>
+                            <div class="text-lg font-semibold text-blue-800" id="scalingEff">0.8%</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Effective Speedup</div>
+                            <div class="text-lg font-semibold text-blue-800" id="effectiveSpeedup">0.06x</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Recommended Strategy</div>
+                            <div class="text-lg font-semibold text-red-600" id="recommendedStrategy">ZeRO-3 + Pipeline</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formula-box">
+                    <div class="text-center text-lg font-semibold mb-2">Distributed Training Formulas</div>
+                    <div class="text-sm">Efficiency = Compute_time / (Compute_time + Communication_time)</div>
+                    <div class="text-sm">All-reduce: 2×(N-1)/N × model_size</div>
+                    <div class="text-sm">Pipeline bubble: (stages-1) / microbatches</div>
+                </div>
+                
+                <!-- Scaling Efficiency Chart -->
+                <div class="chart-container">
+                    <canvas id="scalingChart"></canvas>
+                </div>
+                
+                <!-- Interactive GPU Slider -->
+                <div class="slider-container">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Interactive GPU Count: <span id="gpuSliderValue">8</span>
+                    </label>
+                    <input type="range" id="gpuSlider" min="1" max="128" value="8" class="slider" oninput="updateGPUSlider()">
+                </div>
+            </div>
+
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">ZeRO Optimizer Analysis</h3>
+                <div class="grid-3">
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h4 class="font-semibold text-blue-800 mb-2">ZeRO Stage 1</h4>
+                        <div class="text-2xl font-bold text-blue-600" id="zero1Reduction">4×</div>
+                        <div class="text-sm text-blue-700">Optimizer State Partitioning</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h4 class="font-semibold text-green-800 mb-2">ZeRO Stage 2</h4>
+                        <div class="text-2xl font-bold text-green-600" id="zero2Reduction">8×</div>
+                        <div class="text-sm text-green-700">+ Gradient Partitioning</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill bg-green-500" style="width: 87.5%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                        <h4 class="font-semibold text-purple-800 mb-2">ZeRO Stage 3</h4>
+                        <div class="text-2xl font-bold text-purple-600" id="zero3Reduction">Linear</div>
+                        <div class="text-sm text-purple-700">+ Parameter Partitioning</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill bg-purple-500" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLOPS Analysis Section -->
+        <div id="flops" class="section-content">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">FLOPS Analysis & Performance</h2>
+            
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Training FLOPS Calculator</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model Parameters (Non-embedding)</label>
+                        <input type="number" id="nonEmbedParams" value="175" class="input-field" oninput="updateFLOPSCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Training Tokens (Billions)</label>
+                        <input type="number" id="trainingTokens" value="300" class="input-field" oninput="updateFLOPSCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Hardware Peak TFLOPS</label>
+                        <input type="number" id="hardwarePeak" value="1979" class="input-field" oninput="updateFLOPSCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Achieved TFLOPS</label>
+                        <input type="number" id="achievedTFLOPS" value="1200" class="input-field" oninput="updateFLOPSCalc()">
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">FLOPS per Token</div>
+                            <div class="text-lg font-semibold text-blue-800" id="flopsPerToken">1.05 TFLOPS</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Total Training FLOPS</div>
+                            <div class="text-lg font-semibold text-blue-800" id="totalTrainingFLOPS">3.15 × 10²³</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Model FLOPS Utilization</div>
+                            <div class="text-lg font-semibold text-blue-800" id="mfu">60.6%</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Training Time (days)</div>
+                            <div class="text-lg font-semibold text-blue-800" id="trainingTime">3.0 days</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Performance Rating</div>
+                            <div class="text-lg font-semibold text-green-600" id="perfRating">Excellent</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formula-box">
+                    <div class="text-center text-lg font-semibold mb-2">OpenAI Scaling Law</div>
+                    <div class="text-sm">Training FLOPS ≈ 6N per token (N = non-embedding parameters)</div>
+                    <div class="text-sm">Forward: 2N FLOPS, Backward: 4N FLOPS</div>
+                    <div class="text-sm">MFU = Model_FLOPS_per_second / Hardware_peak_FLOPS</div>
+                </div>
+            </div>
+
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Inference FLOPS & KV Cache</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model Parameters (Billions)</label>
+                        <input type="number" id="inferenceParams" value="175" class="input-field" oninput="updateInferenceCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Batch Size</label>
+                        <input type="number" id="inferenceBatch" value="1" class="input-field" oninput="updateInferenceCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Input Sequence Length</label>
+                        <input type="number" id="inputSeqLen" value="100" class="input-field" oninput="updateInferenceCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Output Tokens to Generate</label>
+                        <input type="number" id="outputTokens" value="50" class="input-field" oninput="updateInferenceCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Hidden Dimension</label>
+                        <input type="number" id="inferenceHidden" value="12288" class="input-field" oninput="updateInferenceCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Number of Layers</label>
+                        <input type="number" id="inferenceLayers" value="96" class="input-field" oninput="updateInferenceCalc()">
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Prefill FLOPS</div>
+                            <div class="text-lg font-semibold text-blue-800" id="prefillFLOPS">35 TFLOPS</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Generation FLOPS (total)</div>
+                            <div class="text-lg font-semibold text-blue-800" id="generationFLOPS">17.5 TFLOPS</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">KV Cache Memory</div>
+                            <div class="text-lg font-semibold text-blue-800" id="kvCacheMemory">4.5 GB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Total Inference FLOPS</div>
+                            <div class="text-lg font-semibold text-blue-800" id="totalInferenceFLOPS">52.5 TFLOPS</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Tokens per Second (est.)</div>
+                            <div class="text-lg font-semibold text-green-600" id="tokensPerSec">4.5 tok/s</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formula-box">
+                    <div class="text-center text-lg font-semibold mb-2">Inference FLOPS Formulas</div>
+                    <div class="text-sm">Autoregressive: T × 2N FLOPS for T output tokens</div>
+                    <div class="text-sm">KV Cache: B × S × H × L × 2 × bytes_per_param</div>
+                    <div class="text-sm">Prefill scales with sequence length squared</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cost Mathematics Section -->
+        <div id="cost" class="section-content">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Cost Mathematics & Economics</h2>
+            
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Total Cost of Ownership Calculator</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Number of GPUs</label>
+                        <input type="number" id="costNumGPUs" value="8" class="input-field" oninput="updateCostCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">GPU Type</label>
+                        <select id="costGPUType" class="input-field" onchange="updateCostCalc()">
+                            <option value="h100">H100 (80GB)</option>
+                            <option value="a100">A100 (80GB)</option>
+                            <option value="v100">V100 (32GB)</option>
+                            <option value="rtx4090">RTX 4090 (24GB)</option>
+                        </select>
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Usage Hours per Day</label>
+                        <input type="number" id="usageHours" value="24" class="input-field" oninput="updateCostCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Electricity Cost ($/kWh)</label>
+                        <input type="number" id="electricityCost" value="0.10" step="0.01" class="input-field" oninput="updateCostCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Analysis Period (years)</label>
+                        <input type="number" id="analysisPeriod" value="5" class="input-field" oninput="updateCostCalc()">
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Hardware Cost</div>
+                            <div class="text-lg font-semibold text-blue-800" id="hardwareCost">$240,000</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Annual Power Cost</div>
+                            <div class="text-lg font-semibold text-blue-800" id="annualPowerCost">$36,792</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">5-Year On-Premises TCO</div>
+                            <div class="text-lg font-semibold text-blue-800" id="onPremisesTCO">$423,960</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">5-Year Cloud Cost</div>
+                            <div class="text-lg font-semibold text-red-600" id="cloudCost">$2,102,400</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Savings with On-Premises</div>
+                            <div class="text-lg font-semibold text-green-600" id="savings">$1,678,440</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Breakeven Point</div>
+                            <div class="text-lg font-semibold text-blue-800" id="breakevenPoint">6.8 months</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formula-box">
+                    <div class="text-center text-lg font-semibold mb-2">TCO Analysis Formula</div>
+                    <div class="text-sm">On-Premises = Hardware + (Power × Hours × Days × Years)</div>
+                    <div class="text-sm">Cloud = Hourly_rate × Hours × Days × Years</div>
+                    <div class="text-sm">Power includes 30-50% cooling overhead</div>
+                </div>
+                
+                <!-- Cost Comparison Chart -->
+                <div class="chart-container">
+                    <canvas id="costChart"></canvas>
+                </div>
+            </div>
+
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Inference Cost per Token</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">GPU Utilization (%)</label>
+                        <input type="number" id="gpuUtilization" value="80" class="input-field" oninput="updateTokenCostCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tokens per Second</label>
+                        <input type="number" id="tokensPerSecond" value="100" class="input-field" oninput="updateTokenCostCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Server Cost per Hour</label>
+                        <input type="number" id="serverCostHour" value="24" class="input-field" oninput="updateTokenCostCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model Size Category</label>
+                        <select id="modelSizeCategory" class="input-field" onchange="updateTokenCostCalc()">
+                            <option value="small">7B params</option>
+                            <option value="medium">13B params</option>
+                            <option value="large" selected>70B params</option>
+                            <option value="xlarge">175B+ params</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Effective Tokens/Hour</div>
+                            <div class="text-lg font-semibold text-blue-800" id="effectiveTokensHour">288,000</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Cost per 1K Tokens</div>
+                            <div class="text-lg font-semibold text-blue-800" id="costPer1K">$0.083</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Daily Revenue Potential</div>
+                            <div class="text-lg font-semibold text-green-600" id="dailyRevenue">$5,760</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Optimization Opportunity</div>
+                            <div class="text-lg font-semibold text-yellow-600" id="optimization">Medium</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-3 mt-6">
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
+                        <div class="text-2xl font-bold text-green-600">$0.001</div>
+                        <div class="text-sm text-green-700">Optimized Cost</div>
+                        <div class="text-xs text-green-600">80%+ utilization</div>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-center">
+                        <div class="text-2xl font-bold text-yellow-600">$0.005</div>
+                        <div class="text-sm text-yellow-700">Average Cost</div>
+                        <div class="text-xs text-yellow-600">40-60% utilization</div>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg border border-red-200 text-center">
+                        <div class="text-2xl font-bold text-red-600">$0.01+</div>
+                        <div class="text-sm text-red-700">Poor Utilization</div>
+                        <div class="text-xs text-red-600">&lt;30% utilization</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Optimization Section -->
+        <div id="optimization" class="section-content">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Latest Optimization Strategies</h2>
+            
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">FlashAttention Performance Impact</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Sequence Length</label>
+                        <input type="number" id="flashSeqLen" value="2048" class="input-field" oninput="updateFlashAttentionCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Batch Size</label>
+                        <input type="number" id="flashBatchSize" value="32" class="input-field" oninput="updateFlashAttentionCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Hidden Dimension</label>
+                        <input type="number" id="flashHiddenDim" value="4096" class="input-field" oninput="updateFlashAttentionCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">FlashAttention Version</label>
+                        <select id="flashVersion" class="input-field" onchange="updateFlashAttentionCalc()">
+                            <option value="standard">Standard Attention</option>
+                            <option value="flash1">FlashAttention-1</option>
+                            <option value="flash2">FlashAttention-2</option>
+                            <option value="flash3" selected>FlashAttention-3</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Memory Usage</div>
+                            <div class="text-lg font-semibold text-blue-800" id="flashMemory">2.1 GB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Speed Improvement</div>
+                            <div class="text-lg font-semibold text-green-600" id="flashSpeedup">2.8×</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">H100 Utilization</div>
+                            <div class="text-lg font-semibold text-blue-800" id="flashUtilization">75%</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Memory Reduction</div>
+                            <div class="text-lg font-semibold text-green-600" id="flashMemReduction">65%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200 mt-4">
+                    <h4 class="font-semibold text-blue-800 mb-2">FlashAttention-3 Improvements:</h4>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• Warp-specialization for H100 architecture</li>
+                        <li>• Native FP8 support for maximum throughput</li>
+                        <li>• 75% of theoretical H100 maximum utilization</li>
+                        <li>• 1.5-2× speedup over FlashAttention-2</li>
+                    </ul>
+                </div>
+                
+                <!-- FlashAttention Performance Chart -->
+                <div class="chart-container">
+                    <canvas id="flashAttentionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Gradient Checkpointing Trade-offs</h3>
+                <div class="grid-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model Layers</label>
+                        <input type="number" id="checkpointLayers" value="96" class="input-field" oninput="updateCheckpointCalc()">
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Checkpointing Strategy</label>
+                        <select id="checkpointStrategy" class="input-field" onchange="updateCheckpointCalc()">
+                            <option value="none">No Checkpointing</option>
+                            <option value="uniform" selected>Uniform Checkpointing</option>
+                            <option value="sqrt">Square Root Strategy</option>
+                            <option value="adaptive">Adaptive</option>
+                        </select>
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Base Memory (GB)</label>
+                        <input type="number" id="baseMemory" value="500" class="input-field" oninput="updateCheckpointCalc()">
+                    </div>
+                    
+                    <div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Memory Reduction</div>
+                            <div class="text-lg font-semibold text-green-600" id="memoryReduction">√L ≈ 75%</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Compute Overhead</div>
+                            <div class="text-lg font-semibold text-yellow-600" id="computeOverhead">+20%</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Effective Memory</div>
+                            <div class="text-lg font-semibold text-blue-800" id="effectiveMemory">125 GB</div>
+                        </div>
+                        <div class="result-display">
+                            <div class="text-sm text-gray-600">Batch Size Increase</div>
+                            <div class="text-lg font-semibold text-green-600" id="batchIncrease">4×</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="formula-box">
+                    <div class="text-center text-lg font-semibold mb-2">Gradient Checkpointing Formula</div>
+                    <div class="text-sm">Memory = O(√L) instead of O(L)</div>
+                    <div class="text-sm">Compute overhead ≈ 20% additional time</div>
+                    <div class="text-sm">Net benefit: 2-4× larger batch sizes possible</div>
+                </div>
+            </div>
+
+            <div class="calculator-card">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">5D Parallelization Strategy</h3>
+                <div class="grid grid-cols-5 gap-4">
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 text-center">
+                        <h4 class="font-semibold text-blue-800 text-sm mb-2">Data Parallel</h4>
+                        <input type="number" id="dataParallel" value="2" class="w-full p-1 text-center border rounded">
+                        <div class="text-xs text-blue-600 mt-1">Batch splitting</div>
+                    </div>
+                    <div class="bg-green-50 p-3 rounded-lg border border-green-200 text-center">
+                        <h4 class="font-semibold text-green-800 text-sm mb-2">Tensor Parallel</h4>
+                        <input type="number" id="tensorParallel" value="4" class="w-full p-1 text-center border rounded">
+                        <div class="text-xs text-green-600 mt-1">Weight distribution</div>
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 text-center">
+                        <h4 class="font-semibold text-yellow-800 text-sm mb-2">Pipeline Parallel</h4>
+                        <input type="number" id="pipelineParallel" value="8" class="w-full p-1 text-center border rounded">
+                        <div class="text-xs text-yellow-600 mt-1">Layer splitting</div>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-lg border border-purple-200 text-center">
+                        <h4 class="font-semibold text-purple-800 text-sm mb-2">Context Parallel</h4>
+                        <input type="number" id="contextParallel" value="2" class="w-full p-1 text-center border rounded">
+                        <div class="text-xs text-purple-600 mt-1">Sequence splitting</div>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-lg border border-red-200 text-center">
+                        <h4 class="font-semibold text-red-800 text-sm mb-2">Expert Parallel</h4>
+                        <input type="number" id="expertParallel" value="1" class="w-full p-1 text-center border rounded">
+                        <div class="text-xs text-red-600 mt-1">MoE experts</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 grid-2">
+                    <div class="result-display">
+                        <div class="text-sm text-gray-600">Total GPUs Required</div>
+                        <div class="text-lg font-semibold text-blue-800" id="totalGPUs">128</div>
+                    </div>
+                    <div class="result-display">
+                        <div class="text-sm text-gray-600">Communication Complexity</div>
+                        <div class="text-lg font-semibold text-yellow-600" id="commComplexity">High</div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border border-green-200 mt-4">
+                    <h4 class="font-semibold text-green-800 mb-2">Meta's Llama 3.1 405B Configuration:</h4>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• 16,000+ H100 GPUs across multiple datacenters</li>
+                        <li>• 5D parallelization with advanced scheduling</li>
+                        <li>• Optimal efficiency achieved at 64-512 GPU clusters</li>
+                        <li>• Sophisticated fault tolerance and checkpointing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-6 text-center">
+            <h3 class="text-xl font-semibold mb-4">GPU Mathematics Mastery</h3>
+            <p class="text-gray-300 max-w-2xl mx-auto">
+                Understanding GPU mathematics is essential for building efficient, scalable ML infrastructure. 
+                From memory optimization through distributed communication complexity, these mathematical 
+                principles determine the success of modern AI projects.
+            </p>
+            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                    <div class="text-2xl font-bold text-blue-400">10×</div>
+                    <div class="text-sm text-gray-400">Cost Reduction Possible</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-green-400">75%</div>
+                    <div class="text-sm text-gray-400">Max H100 Utilization</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-purple-400">3.5×</div>
+                    <div class="text-sm text-gray-400">Tensor Core Speedup</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-yellow-400">37%</div>
+                    <div class="text-sm text-gray-400">Mixed Precision Savings</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-
-        // Navigation functionality
+        // Navigation
         function showSection(sectionId) {
             // Hide all sections
-            document.querySelectorAll('.section-content').forEach(function(section) {
+            document.querySelectorAll('.section-content').forEach(section => {
                 section.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-button').forEach(button => {
+                button.classList.remove('active');
             });
             
             // Show selected section
             document.getElementById(sectionId).classList.add('active');
             
-            // Update navigation
-            document.querySelectorAll('.nav-item').forEach(function(item) {
-                item.classList.remove('active');
-                item.classList.add('text-gray-600', 'hover:text-gray-900', 'hover:bg-gray-50');
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Tensor Core Calculator
+        function updateTensorCoreCalc() {
+            const matrixSize = parseInt(document.getElementById('matrixSize').value);
+            const precision = document.getElementById('precision').value;
+            const gpuType = document.getElementById('gpuType').value;
+            
+            // Operations count (2N³ for matrix multiplication)
+            const operations = 2 * Math.pow(matrixSize, 3);
+            
+            // Memory requirements based on precision
+            const bytesPerElement = {
+                'fp32': 4, 'fp16': 2, 'fp8': 1, 'int8': 1
+            };
+            const memory = 3 * Math.pow(matrixSize, 2) * bytesPerElement[precision];
+            
+            // GPU peak TFLOPS
+            const gpuPeakTFLOPS = {
+                'h100': {'fp32': 67, 'fp16': 1979, 'fp8': 3958, 'int8': 3958},
+                'a100': {'fp32': 19.5, 'fp16': 312, 'fp8': 624, 'int8': 624},
+                'v100': {'fp32': 15.7, 'fp16': 125, 'fp8': 125, 'int8': 125},
+                'rtx4090': {'fp32': 35, 'fp16': 165, 'fp8': 165, 'int8': 165}
+            };
+            
+            const peakTFLOPS = gpuPeakTFLOPS[gpuType][precision];
+            const executionTime = (operations / 1e12) / peakTFLOPS * 1000; // ms
+            const arithmeticIntensity = operations / memory;
+            
+            document.getElementById('operationsCount').textContent = 
+                (operations / 1e9).toFixed(1) + ' GFLOPS';
+            document.getElementById('executionTime').textContent = 
+                executionTime.toFixed(3) + ' ms';
+            document.getElementById('memoryRequired').textContent = 
+                (memory / 1e6).toFixed(1) + ' MB';
+            document.getElementById('arithmeticIntensity').textContent = 
+                arithmeticIntensity.toFixed(1) + ' ops/byte';
+        }
+
+        // Memory Calculator
+        function updateMemoryCalc() {
+            const params = parseFloat(document.getElementById('modelParams').value) * 1e9;
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+            const seqLength = parseInt(document.getElementById('seqLength').value);
+            const hiddenDim = parseInt(document.getElementById('hiddenDim').value);
+            const numLayers = parseInt(document.getElementById('numLayers').value);
+            const trainingMode = document.getElementById('trainingMode').value;
+            
+            // Bytes per parameter based on training mode
+            const bytesPerParam = {
+                'fp32': 16, // 4 model + 4 grad + 8 optimizer
+                'mixed': 10, // 2 model + 2 grad + 6 optimizer  
+                'fp16': 8   // 2 model + 2 grad + 4 optimizer
+            };
+            
+            const paramMemory = params * bytesPerParam[trainingMode] / 4; // Only model weights
+            const gradMemory = paramMemory; // Same as parameters
+            const optimizerMemory = paramMemory * 2; // Adam state
+            
+            // Activation memory: B × S × H × L × factor
+            const activationMemory = batchSize * seqLength * hiddenDim * numLayers * 
+                (trainingMode === 'fp32' ? 4 : 2) * 18; // 18 is approximate factor for all activations
+            
+            const totalMemory = paramMemory + gradMemory + optimizerMemory + activationMemory;
+            const gpusRequired = Math.ceil(totalMemory / (80 * 1e9)); // 80GB per GPU
+            
+            document.getElementById('paramMemory').textContent = 
+                (paramMemory / 1e9).toFixed(0) + ' GB';
+            document.getElementById('gradMemory').textContent = 
+                (gradMemory / 1e9).toFixed(0) + ' GB';
+            document.getElementById('optimizerMemory').textContent = 
+                (optimizerMemory / 1e9).toFixed(0) + ' GB';
+            document.getElementById('activationMemory').textContent = 
+                (activationMemory / 1e9).toFixed(1) + ' TB';
+            document.getElementById('totalMemory').textContent = 
+                (totalMemory / 1e12).toFixed(1) + ' TB';
+            document.getElementById('gpusRequired').textContent = 
+                gpusRequired + ' GPUs';
+        }
+
+        // Parameter Counter
+        function updateParamCount() {
+            const vocabSize = parseInt(document.getElementById('vocabSize').value);
+            const embedDim = parseInt(document.getElementById('embedDim').value);
+            const maxPos = parseInt(document.getElementById('maxPos').value);
+            const layers = parseInt(document.getElementById('transformerLayers').value);
+            
+            // Embedding parameters: E × (V + P)
+            const embeddingParams = embedDim * (vocabSize + maxPos);
+            
+            // Per layer: 12E² (attention) + 13E (layer norms + bias)
+            const attentionParams = layers * 12 * Math.pow(embedDim, 2);
+            const mlpParams = layers * 8 * Math.pow(embedDim, 2); // 4E hidden dimension
+            const layerParams = attentionParams + mlpParams + layers * 13 * embedDim;
+            
+            // Output layer: 2E (final layer norm + output projection)
+            const outputParams = 2 * embedDim;
+            
+            const totalParams = embeddingParams + layerParams + outputParams;
+            
+            document.getElementById('embeddingParams').textContent = 
+                (embeddingParams / 1e6).toFixed(1) + 'M';
+            document.getElementById('attentionParams').textContent = 
+                (attentionParams / 1e6).toFixed(1) + 'M';
+            document.getElementById('mlpParams').textContent = 
+                (mlpParams / 1e6).toFixed(1) + 'M';
+            document.getElementById('totalParams').textContent = 
+                (totalParams / 1e6).toFixed(1) + 'M';
+        }
+
+        // Distributed Training Calculator
+        function updateDistributedCalc() {
+            const numGPUs = parseInt(document.getElementById('numGPUs').value);
+            const modelSizeGB = parseFloat(document.getElementById('modelSizeGB').value);
+            const networkBW = parseFloat(document.getElementById('networkBW').value); // Gb/s
+            const computeTimeMS = parseFloat(document.getElementById('computeTimeMS').value);
+            const strategy = document.getElementById('parallelStrategy').value;
+            
+            // All-reduce communication: 2×(N-1)/N × model_size
+            const commVolumeGB = 2 * (numGPUs - 1) / numGPUs * modelSizeGB;
+            const commTimeSec = (commVolumeGB * 8) / networkBW; // Convert GB to Gb
+            const commTimeMS = commTimeSec * 1000;
+            
+            // Scaling efficiency
+            const efficiency = computeTimeMS / (computeTimeMS + commTimeMS) * 100;
+            const effectiveSpeedup = numGPUs * (efficiency / 100);
+            
+            // Strategy recommendations
+            let recommendation = "Standard All-Reduce";
+            if (efficiency < 30) recommendation = "ZeRO-3 + Pipeline";
+            else if (efficiency < 50) recommendation = "ZeRO-2 + Tensor Parallel";
+            else if (efficiency < 70) recommendation = "ZeRO-1";
+            
+            document.getElementById('commVolume').textContent = 
+                commVolumeGB.toFixed(1) + ' GB';
+            document.getElementById('commTime').textContent = 
+                commTimeSec.toFixed(2) + ' s';
+            document.getElementById('scalingEff').textContent = 
+                efficiency.toFixed(1) + '%';
+            document.getElementById('effectiveSpeedup').textContent = 
+                effectiveSpeedup.toFixed(1) + 'x';
+            document.getElementById('recommendedStrategy').textContent = recommendation;
+        }
+
+        // FLOPS Calculator
+        function updateFLOPSCalc() {
+            const nonEmbedParams = parseFloat(document.getElementById('nonEmbedParams').value) * 1e9;
+            const trainingTokens = parseFloat(document.getElementById('trainingTokens').value) * 1e9;
+            const hardwarePeak = parseFloat(document.getElementById('hardwarePeak').value);
+            const achievedTFLOPS = parseFloat(document.getElementById('achievedTFLOPS').value);
+            
+            // OpenAI scaling law: 6N FLOPS per token
+            const flopsPerToken = 6 * nonEmbedParams / 1e12; // TFLOPS
+            const totalTrainingFLOPS = flopsPerToken * trainingTokens;
+            
+            // MFU calculation
+            const mfu = (achievedTFLOPS / hardwarePeak) * 100;
+            
+            // Training time estimate
+            const secondsToTrain = (totalTrainingFLOPS * 1e12) / (achievedTFLOPS * 1e12);
+            const daysToTrain = secondsToTrain / (24 * 3600);
+            
+            // Performance rating
+            let perfRating = "Poor";
+            if (mfu > 60) perfRating = "Excellent";
+            else if (mfu > 40) perfRating = "Good";
+            else if (mfu > 20) perfRating = "Fair";
+            
+            document.getElementById('flopsPerToken').textContent = 
+                flopsPerToken.toFixed(2) + ' TFLOPS';
+            document.getElementById('totalTrainingFLOPS').textContent = 
+                totalTrainingFLOPS.toExponential(2);
+            document.getElementById('mfu').textContent = 
+                mfu.toFixed(1) + '%';
+            document.getElementById('trainingTime').textContent = 
+                daysToTrain.toFixed(1) + ' days';
+            document.getElementById('perfRating').textContent = perfRating;
+        }
+
+        // Inference Calculator
+        function updateInferenceCalc() {
+            const params = parseFloat(document.getElementById('inferenceParams').value) * 1e9;
+            const batchSize = parseInt(document.getElementById('inferenceBatch').value);
+            const inputSeqLen = parseInt(document.getElementById('inputSeqLen').value);
+            const outputTokens = parseInt(document.getElementById('outputTokens').value);
+            const hiddenDim = parseInt(document.getElementById('inferenceHidden').value);
+            const layers = parseInt(document.getElementById('inferenceLayers').value);
+            
+            // Prefill: 2N × input_length FLOPS
+            const prefillFLOPS = 2 * params * inputSeqLen / 1e12;
+            
+            // Generation: 2N FLOPS per token
+            const generationFLOPS = 2 * params * outputTokens / 1e12;
+            
+            // KV cache memory: B × S × H × L × 2 × 2 bytes (FP16)
+            const kvCacheMemory = batchSize * (inputSeqLen + outputTokens) * 
+                hiddenDim * layers * 2 * 2;
+            
+            const totalFLOPS = prefillFLOPS + generationFLOPS;
+            
+            // Estimated tokens per second (assuming 1000 TFLOPS)
+            const tokensPerSec = 1000 / (2 * params / 1e12);
+            
+            document.getElementById('prefillFLOPS').textContent = 
+                prefillFLOPS.toFixed(0) + ' TFLOPS';
+            document.getElementById('generationFLOPS').textContent = 
+                generationFLOPS.toFixed(1) + ' TFLOPS';
+            document.getElementById('kvCacheMemory').textContent = 
+                (kvCacheMemory / 1e9).toFixed(1) + ' GB';
+            document.getElementById('totalInferenceFLOPS').textContent = 
+                totalFLOPS.toFixed(1) + ' TFLOPS';
+            document.getElementById('tokensPerSec').textContent = 
+                tokensPerSec.toFixed(1) + ' tok/s';
+        }
+
+        // Cost Calculator
+        function updateCostCalc() {
+            const numGPUs = parseInt(document.getElementById('costNumGPUs').value);
+            const gpuType = document.getElementById('costGPUType').value;
+            const usageHours = parseFloat(document.getElementById('usageHours').value);
+            const electricityCost = parseFloat(document.getElementById('electricityCost').value);
+            const years = parseFloat(document.getElementById('analysisPeriod').value);
+            
+            // GPU costs and power consumption
+            const gpuSpecs = {
+                'h100': {cost: 30000, power: 700, cloudHourly: 4.0},
+                'a100': {cost: 15000, power: 400, cloudHourly: 2.0},
+                'v100': {cost: 8000, power: 300, cloudHourly: 1.0},
+                'rtx4090': {cost: 1600, power: 450, cloudHourly: 0.6}
+            };
+            
+            const spec = gpuSpecs[gpuType];
+            const hardwareCost = numGPUs * spec.cost;
+            
+            // Power cost (including 40% cooling overhead)
+            const totalPowerW = numGPUs * spec.power * 1.4;
+            const annualPowerCost = (totalPowerW / 1000) * usageHours * 365 * electricityCost;
+            
+            const onPremisesTCO = hardwareCost + (annualPowerCost * years);
+            const cloudCost = numGPUs * spec.cloudHourly * usageHours * 365 * years;
+            
+            const savings = Math.max(0, cloudCost - onPremisesTCO);
+            const breakevenMonths = hardwareCost / (cloudCost / years / 12 - annualPowerCost / 12);
+            
+            document.getElementById('hardwareCost').textContent = 
+                '$' + hardwareCost.toLocaleString();
+            document.getElementById('annualPowerCost').textContent = 
+                '$' + Math.round(annualPowerCost).toLocaleString();
+            document.getElementById('onPremisesTCO').textContent = 
+                '$' + Math.round(onPremisesTCO).toLocaleString();
+            document.getElementById('cloudCost').textContent = 
+                '$' + Math.round(cloudCost).toLocaleString();
+            document.getElementById('savings').textContent = 
+                '$' + Math.round(savings).toLocaleString();
+            document.getElementById('breakevenPoint').textContent = 
+                breakevenMonths.toFixed(1) + ' months';
+        }
+
+        // Token Cost Calculator
+        function updateTokenCostCalc() {
+            const utilization = parseFloat(document.getElementById('gpuUtilization').value) / 100;
+            const tokensPerSec = parseFloat(document.getElementById('tokensPerSecond').value);
+            const serverCostHour = parseFloat(document.getElementById('serverCostHour').value);
+            
+            const effectiveTokensHour = tokensPerSec * 3600 * utilization;
+            const costPer1K = (serverCostHour / effectiveTokensHour) * 1000;
+            const dailyRevenue = effectiveTokensHour * 24 * costPer1K / 1000;
+            
+            let optimization = "Poor";
+            if (utilization > 0.7) optimization = "Excellent";
+            else if (utilization > 0.5) optimization = "Good";
+            else if (utilization > 0.3) optimization = "Medium";
+            
+            document.getElementById('effectiveTokensHour').textContent = 
+                Math.round(effectiveTokensHour).toLocaleString();
+            document.getElementById('costPer1K').textContent = 
+                '$' + costPer1K.toFixed(3);
+            document.getElementById('dailyRevenue').textContent = 
+                '$' + Math.round(dailyRevenue).toLocaleString();
+            document.getElementById('optimization').textContent = optimization;
+        }
+
+        // FlashAttention Calculator
+        function updateFlashAttentionCalc() {
+            const seqLen = parseInt(document.getElementById('flashSeqLen').value);
+            const batchSize = parseInt(document.getElementById('flashBatchSize').value);
+            const hiddenDim = parseInt(document.getElementById('flashHiddenDim').value);
+            const version = document.getElementById('flashVersion').value;
+            
+            // Memory usage (standard vs FlashAttention)
+            const standardMemory = batchSize * Math.pow(seqLen, 2) * hiddenDim * 2 / 1e9; // GB
+            
+            const memoryReductions = {
+                'standard': 1.0,
+                'flash1': 0.5,
+                'flash2': 0.4,
+                'flash3': 0.35
+            };
+            
+            const speedups = {
+                'standard': 1.0,
+                'flash1': 1.5,
+                'flash2': 2.0,
+                'flash3': 2.8
+            };
+            
+            const utilizations = {
+                'standard': 45,
+                'flash1': 55,
+                'flash2': 65,
+                'flash3': 75
+            };
+            
+            const flashMemory = standardMemory * memoryReductions[version];
+            const speedup = speedups[version];
+            const utilization = utilizations[version];
+            const memReduction = (1 - memoryReductions[version]) * 100;
+            
+            document.getElementById('flashMemory').textContent = 
+                flashMemory.toFixed(1) + ' GB';
+            document.getElementById('flashSpeedup').textContent = 
+                speedup.toFixed(1) + '×';
+            document.getElementById('flashUtilization').textContent = 
+                utilization + '%';
+            document.getElementById('flashMemReduction').textContent = 
+                memReduction.toFixed(0) + '%';
+        }
+
+        // Gradient Checkpointing Calculator
+        function updateCheckpointCalc() {
+            const layers = parseInt(document.getElementById('checkpointLayers').value);
+            const strategy = document.getElementById('checkpointStrategy').value;
+            const baseMemory = parseFloat(document.getElementById('baseMemory').value);
+            
+            const reductions = {
+                'none': 1.0,
+                'uniform': 0.5,
+                'sqrt': 1 / Math.sqrt(layers),
+                'adaptive': 0.25
+            };
+            
+            const reduction = reductions[strategy];
+            const effectiveMemory = baseMemory * reduction;
+            const batchIncrease = Math.floor(1 / reduction);
+            
+            document.getElementById('memoryReduction').textContent = 
+                strategy === 'sqrt' ? '√L ≈ ' + Math.round((1-reduction) * 100) + '%' : 
+                Math.round((1-reduction) * 100) + '%';
+            document.getElementById('computeOverhead').textContent = 
+                strategy === 'none' ? '0%' : '+20%';
+            document.getElementById('effectiveMemory').textContent = 
+                effectiveMemory.toFixed(0) + ' GB';
+            document.getElementById('batchIncrease').textContent = 
+                batchIncrease + '×';
+        }
+
+        // Initialize all calculators
+        function initializeCalculators() {
+            updateTensorCoreCalc();
+            updateMemoryCalc();
+            updateParamCount();
+            updateDistributedCalc();
+            updateFLOPSCalc();
+            updateInferenceCalc();
+            updateCostCalc();
+            updateTokenCostCalc();
+            updateFlashAttentionCalc();
+            updateCheckpointCalc();
+            
+            // Add event listeners for 5D parallelization
+            document.querySelectorAll('#dataParallel, #tensorParallel, #pipelineParallel, #contextParallel, #expertParallel').forEach(input => {
+                input.addEventListener('input', update5DParallelization);
             });
             
-            event.target.classList.add('active');
-            event.target.classList.remove('text-gray-600', 'hover:text-gray-900', 'hover:bg-gray-50');
+            update5DParallelization();
         }
 
-        // Calculator functions
-        function updateHardwareCalculations() {
-            var cudaCores = parseFloat(document.getElementById('cudaCores').value) || 5120;
-            var tensorCores = parseFloat(document.getElementById('tensorCores').value) || 432;
-            var clockSpeed = parseFloat(document.getElementById('clockSpeed').value) || 1.4;
-            var memoryBandwidth = parseFloat(document.getElementById('memoryBandwidth').value) || 1555;
-
-            var cudaPerformance = cudaCores * clockSpeed * 2 / 1000; // TFLOPS
-            var tensorPerformance = tensorCores * clockSpeed * 64 * 2 / 1000; // TFLOPS
-            var speedup = tensorPerformance / cudaPerformance;
-
-            document.getElementById('cudaPerformance').textContent = cudaPerformance.toFixed(1) + ' TFLOPS';
-            document.getElementById('tensorPerformance').textContent = tensorPerformance.toFixed(1) + ' TFLOPS';
-            document.getElementById('tensorSpeedup').textContent = speedup.toFixed(1) + 'x';
-            document.getElementById('bandwidth').textContent = memoryBandwidth.toLocaleString() + ' GB/s';
+        // 5D Parallelization Calculator
+        function update5DParallelization() {
+            const dp = parseInt(document.getElementById('dataParallel').value) || 1;
+            const tp = parseInt(document.getElementById('tensorParallel').value) || 1;
+            const pp = parseInt(document.getElementById('pipelineParallel').value) || 1;
+            const cp = parseInt(document.getElementById('contextParallel').value) || 1;
+            const ep = parseInt(document.getElementById('expertParallel').value) || 1;
+            
+            const totalGPUs = dp * tp * pp * cp * ep;
+            
+            let complexity = "Low";
+            if (totalGPUs > 1000) complexity = "Extreme";
+            else if (totalGPUs > 256) complexity = "Very High";
+            else if (totalGPUs > 64) complexity = "High";
+            else if (totalGPUs > 16) complexity = "Medium";
+            
+            document.getElementById('totalGPUs').textContent = totalGPUs;
+            document.getElementById('commComplexity').textContent = complexity;
         }
 
-        function updateMemoryCalculations() {
-            var modelParams = parseFloat(document.getElementById('modelParams').value) || 175;
-            var batchSize = parseFloat(document.getElementById('batchSize').value) || 32;
-            var seqLength = parseFloat(document.getElementById('seqLength').value) || 2048;
-            var hiddenSize = parseFloat(document.getElementById('hiddenSize').value) || 12288;
-            var precision = document.getElementById('precision').value;
+        // Chart variables
+        let performanceChart, scalingChart, costChart, memoryChart, flashAttentionChart, benchmarkChart;
 
-            var bytesPerParam = precision === 'fp32' ? 4 : precision === 'fp16' ? 2 : 2;
-            var optimizerBytes = precision === 'fp32' ? 12 : precision === 'fp16' ? 6 : 18;
-
-            var weightMemory = modelParams * bytesPerParam;
-            var totalOptimizerMemory = modelParams * optimizerBytes;
-            var activationMemory = batchSize * seqLength * hiddenSize * 2 / Math.pow(1024, 3);
-
-            document.getElementById('weightMemory').textContent = weightMemory.toFixed(1) + ' GB';
-            document.getElementById('optimizerMemory').textContent = (totalOptimizerMemory - weightMemory).toFixed(1) + ' GB';
-            document.getElementById('activationMemory').textContent = activationMemory.toFixed(1) + ' GB';
-            document.getElementById('totalMemory').textContent = (totalOptimizerMemory + activationMemory).toFixed(1) + ' GB';
-            document.getElementById('memoryPerParam').textContent = optimizerBytes + ' bytes';
+        // GPU Slider function
+        function updateGPUSlider() {
+            const value = document.getElementById('gpuSlider').value;
+            document.getElementById('gpuSliderValue').textContent = value;
+            document.getElementById('numGPUs').value = value;
+            updateDistributedCalc();
+            updateScalingChart();
         }
 
-        // Initialize calculations
-        updateHardwareCalculations();
-        updateMemoryCalculations();
+        // Initialize Performance Chart
+        function initializePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            const matrixSizes = [512, 1024, 2048, 4096, 8192, 16384];
+            const fp32Times = matrixSizes.map(size => (2 * Math.pow(size, 3) / 1e12) / 67 * 1000);
+            const fp16Times = matrixSizes.map(size => (2 * Math.pow(size, 3) / 1e12) / 1979 * 1000);
+            const fp8Times = matrixSizes.map(size => (2 * Math.pow(size, 3) / 1e12) / 3958 * 1000);
+            
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: matrixSizes.map(s => s + '×' + s),
+                    datasets: [{
+                        label: 'FP32 (H100)',
+                        data: fp32Times,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'FP16 (H100)',
+                        data: fp16Times,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'FP8 (H100)',
+                        data: fp8Times,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Matrix Multiplication Performance by Precision'
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Matrix Size'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Execution Time (ms)'
+                            },
+                            type: 'logarithmic'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize Scaling Chart
+        function initializeScalingChart() {
+            const ctx = document.getElementById('scalingChart').getContext('2d');
+            
+            scalingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Theoretical Linear Scaling',
+                        data: [],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderDash: [5, 5],
+                        tension: 0.4
+                    }, {
+                        label: 'Actual Scaling Efficiency',
+                        data: [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Communication Overhead',
+                        data: [],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'GPU Scaling Efficiency vs Communication Overhead'
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Number of GPUs'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Efficiency (%)'
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            updateScalingChart();
+        }
+
+        // Update Scaling Chart
+        function updateScalingChart() {
+            const modelSizeGB = parseFloat(document.getElementById('modelSizeGB').value) || 350;
+            const networkBW = parseFloat(document.getElementById('networkBW').value) || 400;
+            const computeTimeMS = parseFloat(document.getElementById('computeTimeMS').value) || 100;
+            
+            const gpuCounts = [1, 2, 4, 8, 16, 32, 64, 128];
+            const theoreticalScaling = gpuCounts.map(() => 100);
+            const actualEfficiency = [];
+            const commOverhead = [];
+            
+            gpuCounts.forEach(numGPUs => {
+                const commVolumeGB = 2 * (numGPUs - 1) / numGPUs * modelSizeGB;
+                const commTimeSec = (commVolumeGB * 8) / networkBW;
+                const commTimeMS = commTimeSec * 1000;
+                const efficiency = computeTimeMS / (computeTimeMS + commTimeMS) * 100;
+                
+                actualEfficiency.push(efficiency);
+                commOverhead.push((commTimeMS / (computeTimeMS + commTimeMS)) * 100);
+            });
+            
+            scalingChart.data.labels = gpuCounts;
+            scalingChart.data.datasets[0].data = theoreticalScaling;
+            scalingChart.data.datasets[1].data = actualEfficiency;
+            scalingChart.data.datasets[2].data = commOverhead;
+            scalingChart.update();
+        }
+
+        // Initialize Cost Chart
+        function initializeCostChart() {
+            const ctx = document.getElementById('costChart').getContext('2d');
+            
+            costChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'],
+                    datasets: [{
+                        label: 'On-Premises Cumulative Cost',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1
+                    }, {
+                        label: 'Cloud Cumulative Cost',
+                        data: [],
+                        backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                        borderColor: '#ef4444',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '5-Year Total Cost of Ownership Comparison'
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Years'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Cumulative Cost ($)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + (value / 1000).toFixed(0) + 'K';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            updateCostChart();
+        }
+
+        // Initialize Memory Chart
+        function initializeMemoryChart() {
+            const ctx = document.getElementById('memoryChart').getContext('2d');
+            
+            memoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Model Parameters', 'Gradients', 'Optimizer State', 'Activations'],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#ef4444'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Training Memory Breakdown'
+                        },
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+            
+            updateMemoryChart();
+        }
+
+        // Update Memory Chart
+        function updateMemoryChart() {
+            const params = parseFloat(document.getElementById('modelParams').value) * 1e9;
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+            const seqLength = parseInt(document.getElementById('seqLength').value);
+            const hiddenDim = parseInt(document.getElementById('hiddenDim').value);
+            const numLayers = parseInt(document.getElementById('numLayers').value);
+            const trainingMode = document.getElementById('trainingMode').value;
+            
+            const bytesPerParam = {
+                'fp32': 16, 'mixed': 10, 'fp16': 8
+            };
+            
+            const paramMemory = params * bytesPerParam[trainingMode] / 4;
+            const gradMemory = paramMemory;
+            const optimizerMemory = paramMemory * 2;
+            const activationMemory = batchSize * seqLength * hiddenDim * numLayers * 
+                (trainingMode === 'fp32' ? 4 : 2) * 18;
+            
+            memoryChart.data.datasets[0].data = [
+                paramMemory / 1e9,
+                gradMemory / 1e9,
+                optimizerMemory / 1e9,
+                activationMemory / 1e9
+            ];
+            memoryChart.update();
+        }
+
+        // Initialize FlashAttention Chart
+        function initializeFlashAttentionChart() {
+            const ctx = document.getElementById('flashAttentionChart').getContext('2d');
+            
+            flashAttentionChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Memory Efficiency', 'Speed', 'GPU Utilization', 'Precision Support', 'Scalability'],
+                    datasets: [{
+                        label: 'Standard Attention',
+                        data: [40, 45, 45, 60, 50],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        pointBackgroundColor: '#ef4444',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#ef4444'
+                    }, {
+                        label: 'FlashAttention-2',
+                        data: [75, 80, 65, 80, 85],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#3b82f6'
+                    }, {
+                        label: 'FlashAttention-3',
+                        data: [90, 95, 85, 95, 90],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'FlashAttention Performance Comparison'
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Dashboard Metrics
+        function updateDashboard() {
+            // Calculate overall metrics from current settings
+            const mfu = parseFloat(document.getElementById('mfu').textContent) || 60.6;
+            const memoryUtil = Math.random() * 20 + 60; // 60-80%
+            const speed = Math.random() * 100 + 300; // 300-400 tok/s
+            const cost = parseFloat(document.getElementById('costPer1K').textContent.replace('$', '')) || 0.045;
+            const efficiency = parseFloat(document.getElementById('scalingEff').textContent) || 44.9;
+            const overallScore = (mfu/10 + memoryUtil/10 + Math.min(speed/50, 10) + (1/cost) + efficiency/10) / 5;
+            
+            document.getElementById('dashboardEfficiency').textContent = mfu.toFixed(1) + '%';
+            document.getElementById('dashboardMemory').textContent = memoryUtil.toFixed(1) + '%';
+            document.getElementById('dashboardSpeed').textContent = Math.round(speed) + ' tok/s';
+            document.getElementById('dashboardCost').textContent = '$' + cost.toFixed(3);
+            document.getElementById('dashboardScale').textContent = (efficiency/10).toFixed(1) + '×';
+            document.getElementById('dashboardScore').textContent = overallScore.toFixed(1) + '/10';
+        }
+
+        // Initialize Benchmark Chart
+        function initializeBenchmarkChart() {
+            const ctx = document.getElementById('benchmarkChart').getContext('2d');
+            
+            benchmarkChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'H100',
+                        data: [{x: 1979, y: 30000}],
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: '#10b981',
+                        pointRadius: 12
+                    }, {
+                        label: 'A100',
+                        data: [{x: 312, y: 15000}],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: '#3b82f6',
+                        pointRadius: 10
+                    }, {
+                        label: 'V100',
+                        data: [{x: 125, y: 8000}],
+                        backgroundColor: 'rgba(245, 158, 11, 0.8)',
+                        borderColor: '#f59e0b',
+                        pointRadius: 8
+                    }, {
+                        label: 'RTX 4090',
+                        data: [{x: 165, y: 1600}],
+                        backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                        borderColor: '#a855f7',
+                        pointRadius: 9
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'GPU Performance vs Price (FP16 TFLOPS vs Price USD)'
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'FP16 TFLOPS'
+                            },
+                            type: 'logarithmic'
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Price (USD)'
+                            },
+                            type: 'logarithmic'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Cost Chart
+        function updateCostChart() {
+            const numGPUs = parseInt(document.getElementById('costNumGPUs').value) || 8;
+            const gpuType = document.getElementById('costGPUType').value || 'h100';
+            const usageHours = parseFloat(document.getElementById('usageHours').value) || 24;
+            const electricityCost = parseFloat(document.getElementById('electricityCost').value) || 0.10;
+            
+            const gpuSpecs = {
+                'h100': {cost: 30000, power: 700, cloudHourly: 4.0},
+                'a100': {cost: 15000, power: 400, cloudHourly: 2.0},
+                'v100': {cost: 8000, power: 300, cloudHourly: 1.0},
+                'rtx4090': {cost: 1600, power: 450, cloudHourly: 0.6}
+            };
+            
+            const spec = gpuSpecs[gpuType];
+            const hardwareCost = numGPUs * spec.cost;
+            const totalPowerW = numGPUs * spec.power * 1.4;
+            const annualPowerCost = (totalPowerW / 1000) * usageHours * 365 * electricityCost;
+            const annualCloudCost = numGPUs * spec.cloudHourly * usageHours * 365;
+            
+            const onPremisesCosts = [];
+            const cloudCosts = [];
+            
+            for (let year = 1; year <= 5; year++) {
+                onPremisesCosts.push(hardwareCost + (annualPowerCost * year));
+                cloudCosts.push(annualCloudCost * year);
+            }
+            
+            costChart.data.datasets[0].data = onPremisesCosts;
+            costChart.data.datasets[1].data = cloudCosts;
+            costChart.update();
+        }
+
+        // Enhanced initialization
+        function initializeCalculators() {
+            updateTensorCoreCalc();
+            updateMemoryCalc();
+            updateParamCount();
+            updateDistributedCalc();
+            updateFLOPSCalc();
+            updateInferenceCalc();
+            updateCostCalc();
+            updateTokenCostCalc();
+            updateFlashAttentionCalc();
+            updateCheckpointCalc();
+            
+            // Initialize charts
+            initializePerformanceChart();
+            initializeScalingChart();
+            initializeCostChart();
+            initializeMemoryChart();
+            initializeFlashAttentionChart();
+            initializeBenchmarkChart();
+            
+            // Initialize dashboard
+            updateDashboard();
+            
+            // Add event listeners for 5D parallelization
+            document.querySelectorAll('#dataParallel, #tensorParallel, #pipelineParallel, #contextParallel, #expertParallel').forEach(input => {
+                input.addEventListener('input', update5DParallelization);
+            });
+            
+            // Add event listeners for chart updates
+            document.getElementById('modelSizeGB').addEventListener('input', updateScalingChart);
+            document.getElementById('networkBW').addEventListener('input', updateScalingChart);
+            document.getElementById('computeTimeMS').addEventListener('input', updateScalingChart);
+            document.getElementById('costNumGPUs').addEventListener('input', updateCostChart);
+            document.getElementById('costGPUType').addEventListener('change', updateCostChart);
+            document.getElementById('usageHours').addEventListener('input', updateCostChart);
+            document.getElementById('electricityCost').addEventListener('input', updateCostChart);
+            
+            // Add event listeners for memory chart updates
+            document.getElementById('modelParams').addEventListener('input', () => { updateMemoryChart(); updateDashboard(); });
+            document.getElementById('batchSize').addEventListener('input', () => { updateMemoryChart(); updateDashboard(); });
+            document.getElementById('seqLength').addEventListener('input', () => { updateMemoryChart(); updateDashboard(); });
+            document.getElementById('hiddenDim').addEventListener('input', () => { updateMemoryChart(); updateDashboard(); });
+            document.getElementById('numLayers').addEventListener('input', () => { updateMemoryChart(); updateDashboard(); });
+            document.getElementById('trainingMode').addEventListener('change', () => { updateMemoryChart(); updateDashboard(); });
+            
+            // Add event listeners for dashboard updates
+            document.getElementById('achievedTFLOPS').addEventListener('input', updateDashboard);
+            document.getElementById('gpuUtilization').addEventListener('input', updateDashboard);
+            
+            // Auto-update dashboard every 3 seconds for dynamic feel
+            setInterval(updateDashboard, 3000);
+            
+            update5DParallelization();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeCalculators);
     </script>
 </body>
 </html>
